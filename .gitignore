@@ -1,0 +1,17 @@
+node_modules/
+.next/
+out/
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+next-env.d.ts
+
+# секреты и локальная база
+.env
+.env.*
+!.env.example
+.local/
+
+# рабочие файлы исполнения плана
+.superpowers/
