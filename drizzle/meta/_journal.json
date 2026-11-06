@@ -1,0 +1,8 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    { "idx": 0, "version": "7", "when": 1793930000000, "tag": "0000_base", "breakpoints": true },
+    { "idx": 1, "version": "7", "when": 1793930000001, "tag": "0001_no_overlap", "breakpoints": true }
+  ]
+}
