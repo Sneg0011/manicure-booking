@@ -3,6 +3,7 @@ import { getDeps } from '../../../../lib/deps';
 import { getCallList } from '../../../../booking/call-list';
 import { markAdminWarnedAction } from '../../../actions/admin';
 import { reasonText, when } from '../../../../admin/labels';
+import { formatStudioDate } from '../../../../lib/time';
 
 export default async function Page() {
   const rows = await getCallList(getDeps());
@@ -53,7 +54,7 @@ export default async function Page() {
                   </td>
                   <td>
                     <Link
-                      href={`/admin/calendar?date=${when(row.startsAt).slice(0, 10)}&booking=${row.bookingId}`}
+                      href={`/admin/calendar?date=${formatStudioDate(row.startsAt)}&booking=${row.bookingId}`}
                     >
                       Открыть
                     </Link>

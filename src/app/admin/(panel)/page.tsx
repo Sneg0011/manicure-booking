@@ -4,6 +4,7 @@ import { getDeps } from '../../../lib/deps';
 import { getSummary } from '../../../booking/summary';
 import { bookings, clients, masters, services } from '../../../db/schema';
 import { when } from '../../../admin/labels';
+import { formatStudioDate } from '../../../lib/time';
 
 export default async function AdminPage() {
   const deps = getDeps();
@@ -70,7 +71,7 @@ export default async function AdminPage() {
                 <td>{row.serviceName}</td>
                 <td>
                   <Link
-                    href={`/admin/calendar?date=${when(row.startsAt).slice(0, 10)}&booking=${row.id}`}
+                    href={`/admin/calendar?date=${formatStudioDate(row.startsAt)}&booking=${row.id}`}
                   >
                     Открыть
                   </Link>

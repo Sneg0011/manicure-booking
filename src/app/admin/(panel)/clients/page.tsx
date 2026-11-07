@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { getDeps } from '../../../../lib/deps';
 import { getClientCard, listClients } from '../../../../admin/clients';
 import { actorText, statusText, when } from '../../../../admin/labels';
+import { formatStudioDate } from '../../../../lib/time';
 
 const eventText: Record<string, string> = {
   created: 'Создана запись',
@@ -73,7 +74,7 @@ export default async function Page({
                     <td>{statusText[row.status]}</td>
                     <td>
                       <Link
-                        href={`/admin/calendar?date=${when(row.startsAt).slice(0, 10)}&booking=${row.id}`}
+                        href={`/admin/calendar?date=${formatStudioDate(row.startsAt)}&booking=${row.id}`}
                       >
                         Открыть
                       </Link>

@@ -102,6 +102,8 @@ test('отметка звонка сохраняется, клиенты и жу
     await expect(callRow).toContainText('Сообщить об изменении');
     await expect(callRow.locator('a[href^="tel:"]')).toBeVisible();
     await callRow.getByRole('button', { name: 'Менеджер предупредил' }).click();
+    // Сначала ждём ответа сервера: перезагрузка сразу после нажатия оборвала бы запрос.
+    await expect(callRow).toHaveCount(0);
     await page.reload();
     await expect(
       page.locator('tr', { has: page.locator(`a[href*="booking=${row.id}"]`) }),

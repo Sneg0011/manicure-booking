@@ -63,10 +63,7 @@ export default async function Page({
               <thead>
                 <tr>
                   <th>День</th>
-                  <th>Открытие</th>
-                  <th>Закрытие</th>
-                  <th>Выходной</th>
-                  <th></th>
+                  <th colSpan={4}>Открытие, закрытие, выходной</th>
                 </tr>
               </thead>
               <tbody>

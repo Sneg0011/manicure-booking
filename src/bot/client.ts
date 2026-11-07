@@ -6,6 +6,7 @@ import { getRules, nextStudioDate } from '../booking/rules';
 import type { BookingView, Deps, Slot } from '../booking/types';
 import { bookings, clientChats, masters, services } from '../db/schema';
 import { formatStudioDate, formatStudioTime, fromStudioTime } from '../lib/time';
+import { dateText, slotText } from '../site/format';
 
 type Buttons = { text: string; callback_data: string }[][];
 const unavailable = 'Запись уже изменена или недоступна';
@@ -47,7 +48,7 @@ async function view(deps: Deps, id: number, chatId: string): Promise<BookingView
 }
 function card(v: BookingView): { text: string; buttons: Buttons } {
   return {
-    text: `Запись №${v.id}\n${v.serviceName}\nМастер: ${v.masterName}\n${formatStudioDate(v.startsAt)} ${formatStudioTime(v.startsAt)} МСК\nЦена: ${v.priceRub} ₽\nСтатус: ${statusText[v.status]}`,
+    text: `Запись №${v.id}\n${v.serviceName}\nМастер: ${v.masterName}\n${slotText(v.startsAt)}\nЦена: ${v.priceRub} ₽\nСтатус: ${statusText[v.status]}`,
     buttons:
       v.status === 'active'
         ? [[button('Перенести', `mv:${v.id}`), button('Отменить', `cx:${v.id}`)]]
@@ -83,7 +84,7 @@ async function dates(ctx: Context, deps: Deps, v: BookingView): Promise<void> {
     if (
       (await getAvailability(deps, { serviceId: v.serviceId, masterId: v.masterId, date })).length
     )
-      rows.push([button(date, `md:${v.id}:${date.replaceAll('-', '')}`)]);
+      rows.push([button(dateText(date), `md:${v.id}:${date.replaceAll('-', '')}`)]);
   }
   rows.push([button('Назад', `card:${v.id}`)]);
   await edit(ctx, 'Выберите дату', rows);
@@ -94,7 +95,11 @@ async function times(ctx: Context, deps: Deps, v: BookingView, date: string): Pr
   for (let i = 0; i < slots.length; i += 4)
     rows.push(slots.slice(i, i + 4).map((s) => slotButton(v.id, s)));
   rows.push([button('Назад', `mv:${v.id}`)]);
-  await edit(ctx, slots.length ? `${date} МСК — выберите время` : 'Свободного времени нет', rows);
+  await edit(
+    ctx,
+    slots.length ? `${dateText(date)}, МСК — выберите время` : 'Свободного времени нет',
+    rows,
+  );
 }
 
 export function registerClient(bot: Bot, deps: Deps): void {
@@ -139,14 +144,7 @@ export function registerClient(bot: Bot, deps: Deps): void {
     }
     await ctx.reply(
       'Ваши записи',
-      keyboard(
-        rows.map((row) => [
-          button(
-            `${formatStudioDate(row.startsAt)} ${formatStudioTime(row.startsAt)} МСК`,
-            `card:${row.id}`,
-          ),
-        ]),
-      ),
+      keyboard(rows.map((row) => [button(slotText(row.startsAt), `card:${row.id}`)])),
     );
   });
 }
@@ -188,14 +186,10 @@ export async function handleClientCallback(ctx: Context, deps: Deps): Promise<st
     const start = payload && instant(payload);
     if (!start) return unavailable;
     if (action === 'mt') {
-      await edit(
-        ctx,
-        `Перенести запись на ${formatStudioDate(start)} ${formatStudioTime(start)} МСК?`,
-        [
-          [button('Подтвердить', `mc:${id}:${payload}`)],
-          [button('Назад', `md:${id}:${payload!.slice(0, 8)}`)],
-        ],
-      );
+      await edit(ctx, `Перенести запись на ${slotText(start)}?`, [
+        [button('Подтвердить', `mc:${id}:${payload}`)],
+        [button('Назад', `md:${id}:${payload!.slice(0, 8)}`)],
+      ]);
       return;
     }
     const result = await moveBooking(deps, { bookingId: id, newStart: start, actor: 'client_bot' });

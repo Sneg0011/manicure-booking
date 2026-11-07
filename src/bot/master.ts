@@ -5,6 +5,7 @@ import type { Deps } from '../booking/types';
 import { bookings, clients, masters, services } from '../db/schema';
 import { formatStudioDate, formatStudioTime, fromStudioTime } from '../lib/time';
 import { nextStudioDate } from '../booking/rules';
+import { dateText } from '../site/format';
 import type { BotEnv } from './index';
 
 function secretMatches(input: string, secret?: string): boolean {
@@ -53,7 +54,7 @@ async function schedule(ctx: Context, deps: Deps, tomorrow: boolean, edit: boole
       ),
     )
     .orderBy(bookings.startsAt);
-  const text = `${tomorrow ? 'Завтра' : 'Сегодня'}, ${date} МСК\n${
+  const text = `${tomorrow ? 'Завтра' : 'Сегодня'}, ${dateText(date)} МСК\n${
     rows.length
       ? rows
           .map((row) => `${formatStudioTime(row.startsAt)} — ${row.clientName}, ${row.serviceName}`)

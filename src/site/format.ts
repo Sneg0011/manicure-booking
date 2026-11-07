@@ -9,6 +9,9 @@ export function dateText(date: string): string {
     day: 'numeric',
     month: 'long',
     weekday: 'long',
+    ...(date.slice(0, 4) === formatStudioDate(new Date()).slice(0, 4)
+      ? {}
+      : { year: 'numeric' as const }),
     timeZone: 'UTC',
   }).format(new Date(`${date}T12:00:00Z`));
 }

@@ -1243,12 +1243,18 @@ p {
   display: grid;
   place-items: center;
 }
+.admin-shell a[href^='tel:'],
+.admin-table a[href^='tel:'] {
+  white-space: nowrap;
+}
 .admin-booking {
   position: absolute;
   z-index: 2;
   inset-inline: 5px;
   display: block;
   overflow: hidden;
+  /* Короткая запись на 15 минут должна оставаться читаемой. */
+  min-height: 52px;
   padding: 5px 7px;
   border-left: 4px solid var(--rose);
   border-radius: 2px;

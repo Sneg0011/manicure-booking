@@ -1,5 +1,5 @@
-import { formatStudioDate, formatStudioTime } from '../lib/time';
-export const when = (date: Date) => `${formatStudioDate(date)} ${formatStudioTime(date)} МСК`;
+import { slotText } from '../site/format';
+export const when = slotText;
 export const statusText = {
   active: 'Активна',
   cancelled: 'Отменена',
