@@ -15,7 +15,7 @@ import {
 import { getDeps } from '../../lib/deps';
 import { fromStudioTime } from '../../lib/time';
 import { createBooking, moveBooking, cancelBooking, setVisitResult } from '../../booking/service';
-import { markWarned } from '../../booking/call-list';
+import { markWarned, unmarkWarned } from '../../booking/call-list';
 import { bookings } from '../../db/schema';
 import { deliverPending } from '../../notifications/deliver';
 import { getSenderFromEnv } from '../../bot/sender';
@@ -195,4 +195,25 @@ const guardedWarn = managerAction(async (form: FormData) => {
 });
 export async function markAdminWarnedAction(form: FormData): Promise<void> {
   return guardedWarn(form);
+}
+
+const guardedUnwarn = managerAction(async (form: FormData) => {
+  const id = positive(form.get('bookingId'));
+  if (!id) finish(form, 'not_found');
+  const [row] = await getDeps()
+    .db.select({ id: bookings.id })
+    .from(bookings)
+    .where(eq(bookings.id, id))
+    .limit(1);
+  if (!row) finish(form, 'not_found');
+  await unmarkWarned(getDeps(), id);
+  notify();
+  if (form.get('returnTo') === 'calls') {
+    revalidatePath('/admin/calls');
+    redirect('/admin/calls');
+  }
+  finish(form);
+});
+export async function unmarkAdminWarnedAction(form: FormData): Promise<void> {
+  return guardedUnwarn(form);
 }

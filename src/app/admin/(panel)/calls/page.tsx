@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { getDeps } from '../../../../lib/deps';
 import { getCallList } from '../../../../booking/call-list';
-import { markAdminWarnedAction } from '../../../actions/admin';
+import { WarnedCheck } from '../warned-check';
 import { reasonText, when } from '../../../../admin/labels';
 import { formatStudioDate } from '../../../../lib/time';
 
@@ -42,15 +42,11 @@ export default async function Page() {
                   <td>{row.serviceName}</td>
                   <td>{when(row.startsAt)}</td>
                   <td>
-                    {row.warnedAt ? (
-                      <>Менеджер предупредил · {when(row.warnedAt)}</>
-                    ) : (
-                      <form action={markAdminWarnedAction}>
-                        <input type="hidden" name="bookingId" value={row.bookingId} />
-                        <input type="hidden" name="returnTo" value="calls" />
-                        <button type="submit">Менеджер предупредил</button>
-                      </form>
-                    )}
+                    <WarnedCheck
+                      bookingId={row.bookingId}
+                      warnedAt={row.warnedAt}
+                      returnTo="calls"
+                    />
                   </td>
                   <td>
                     <Link

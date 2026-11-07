@@ -8,6 +8,7 @@ import '@fontsource/jost/latin-400.css';
 import '@fontsource/jost/cyrillic-500.css';
 import '@fontsource/jost/latin-500.css';
 import './globals.css';
+import './public.css';
 
 export const metadata: Metadata = {
   title: 'Лунка — студия маникюра',

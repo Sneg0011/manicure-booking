@@ -10,6 +10,7 @@ const eventText: Record<string, string> = {
   cancelled: 'Отменена запись',
   visit_result: 'Отмечен визит',
   warned: 'Менеджер предупредил',
+  unwarned: 'Отметка снята',
 };
 function eventDetails(value: unknown): string {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return '—';

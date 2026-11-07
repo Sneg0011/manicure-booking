@@ -1,5 +1,5 @@
 import type { BookingStatus, Deps } from './types';
-import { eq, sql } from 'drizzle-orm';
+import { and, desc, eq, isNotNull, sql } from 'drizzle-orm';
 import { bookingEvents, bookings } from '../db/schema';
 import { formatStudioDate } from '../lib/time';
 import { nextStudioDate } from './rules';
@@ -54,12 +54,55 @@ export async function getCallList(deps: Deps): Promise<CallItem[]> {
 
 export async function markWarned(deps: Deps, bookingId: number): Promise<void> {
   await deps.db.transaction(async (tx) => {
+    const [current] = await tx
+      .select({ needsCall: bookings.needsCall })
+      .from(bookings)
+      .where(eq(bookings.id, bookingId))
+      .for('update');
+    if (!current) throw new Error('booking not found');
     const [row] = await tx
       .update(bookings)
       .set({ warnedAt: deps.now(), needsCall: null })
       .where(eq(bookings.id, bookingId))
       .returning({ id: bookings.id });
     if (!row) throw new Error('booking not found');
-    await tx.insert(bookingEvents).values({ bookingId, actor: 'manager', type: 'warned' });
+    await tx.insert(bookingEvents).values({
+      bookingId,
+      actor: 'manager',
+      type: 'warned',
+      before: { needsCall: current.needsCall },
+    });
+  });
+}
+
+export async function unmarkWarned(deps: Deps, bookingId: number): Promise<void> {
+  await deps.db.transaction(async (tx) => {
+    const [current] = await tx
+      .select({ warnedAt: bookings.warnedAt })
+      .from(bookings)
+      .where(eq(bookings.id, bookingId))
+      .for('update');
+    if (!current?.warnedAt) return;
+
+    const [lastWarned] = await tx
+      .select({ before: bookingEvents.before })
+      .from(bookingEvents)
+      .where(and(eq(bookingEvents.bookingId, bookingId), eq(bookingEvents.type, 'warned')))
+      .orderBy(desc(bookingEvents.id))
+      .limit(1);
+    const before = lastWarned?.before;
+    const needsCall =
+      before &&
+      typeof before === 'object' &&
+      !Array.isArray(before) &&
+      'needsCall' in before &&
+      before.needsCall === 'changed'
+        ? before.needsCall
+        : null;
+    await tx
+      .update(bookings)
+      .set({ warnedAt: null, needsCall })
+      .where(and(eq(bookings.id, bookingId), isNotNull(bookings.warnedAt)));
+    await tx.insert(bookingEvents).values({ bookingId, actor: 'manager', type: 'unwarned' });
   });
 }

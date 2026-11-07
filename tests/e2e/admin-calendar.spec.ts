@@ -127,6 +127,37 @@ test('календарь показывает запись сайта, не вы
   await visitor.close();
 });
 
+test('галочку предупреждения можно отметить и снять', async ({ page }) => {
+  await login(page);
+  const row = (
+    await sql(
+      "SELECT id, starts_at, warned_at, needs_call FROM bookings WHERE status='active' AND starts_at > now() ORDER BY starts_at LIMIT 1",
+    )
+  ).rows[0];
+  const date = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Moscow' }).format(
+    row.starts_at,
+  );
+  try {
+    await sql('UPDATE bookings SET warned_at=NULL WHERE id=$1', [row.id]);
+    await page.goto(`/admin/calendar?date=${date}&booking=${row.id}`);
+    const check = page.getByRole('button', { name: 'Менеджер предупредил' });
+    await expect(check).toHaveAttribute('aria-pressed', 'false');
+    await check.click();
+    await expect(check).toHaveAttribute('aria-pressed', 'true');
+    await check.click();
+    await expect(check).toHaveAttribute('aria-pressed', 'false');
+    expect(
+      (await sql('SELECT warned_at FROM bookings WHERE id=$1', [row.id])).rows[0].warned_at,
+    ).toBeNull();
+  } finally {
+    await sql('UPDATE bookings SET warned_at=$1, needs_call=$2 WHERE id=$3', [
+      row.warned_at,
+      row.needs_call,
+      row.id,
+    ]);
+  }
+});
+
 test('POST без cookie не меняет базу; выход закрывает панель; мобильная ширина', async ({
   page,
 }) => {

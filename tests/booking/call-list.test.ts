@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, expect, test } from 'vitest';
 import { eq } from 'drizzle-orm';
 import type { Pool } from 'pg';
-import { getCallList, markWarned } from '../../src/booking/call-list';
+import { getCallList, markWarned, unmarkWarned } from '../../src/booking/call-list';
 import { cancelBooking, createBooking, moveBooking } from '../../src/booking/service';
 import { getSummary } from '../../src/booking/summary';
 import type { Deps } from '../../src/booking/types';
@@ -92,6 +92,50 @@ test('remind includes today and tomorrow, excludes later, past and warned', asyn
   ).toEqual({ actor: 'manager', type: 'warned' });
   clock.current = at('10:01');
   expect((await getCallList(d)).map((r) => r.bookingId)).toEqual([tomorrow.id]);
+});
+
+test('unmarkWarned clears warned_at, restores needs_call and records unwarned', async () => {
+  const booking = await create('10:00');
+  await db.update(bookings).set({ needsCall: 'changed' }).where(eq(bookings.id, booking.id));
+  await markWarned(d, booking.id);
+  const warned = (
+    await pool.query('SELECT before FROM booking_events WHERE booking_id=$1 AND type=$2', [
+      booking.id,
+      'warned',
+    ])
+  ).rows[0];
+  expect(warned.before).toEqual({ needsCall: 'changed' });
+
+  await unmarkWarned(d, booking.id);
+  const row = (
+    await pool.query('SELECT warned_at, needs_call FROM bookings WHERE id=$1', [booking.id])
+  ).rows[0];
+  expect(row).toEqual({ warned_at: null, needs_call: 'changed' });
+  expect(
+    (
+      await pool.query(
+        'SELECT actor, type FROM booking_events WHERE booking_id=$1 ORDER BY id DESC LIMIT 1',
+        [booking.id],
+      )
+    ).rows[0],
+  ).toEqual({ actor: 'manager', type: 'unwarned' });
+});
+
+test('unmarkWarned does nothing without an active mark or booking', async () => {
+  const booking = await create('10:00');
+  const count = async () =>
+    Number(
+      (await pool.query('SELECT count(*) FROM booking_events WHERE booking_id=$1', [booking.id]))
+        .rows[0].count,
+    );
+  const before = await count();
+  await unmarkWarned(d, booking.id);
+  await unmarkWarned(d, 999999999);
+  expect(await count()).toBe(before);
+  await markWarned(d, booking.id);
+  await unmarkWarned(d, booking.id);
+  await unmarkWarned(d, booking.id);
+  expect(await count()).toBe(before + 2);
 });
 
 test('move resets warned_at and returns a due reminder', async () => {

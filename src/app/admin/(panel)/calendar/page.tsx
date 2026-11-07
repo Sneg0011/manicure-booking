@@ -22,8 +22,8 @@ import {
   moveAdminBookingAction,
   cancelAdminBookingAction,
   setAdminVisitAction,
-  markAdminWarnedAction,
 } from '../../../actions/admin';
+import { WarnedCheck } from '../warned-check';
 
 type Params = { date?: string; view?: string; booking?: string; error?: string };
 const statusText = {
@@ -44,6 +44,7 @@ const typeText: Record<string, string> = {
   cancelled: 'отменил запись',
   visit_result: 'отметил визит',
   warned: 'отметил предупреждение',
+  unwarned: 'Отметка снята',
 };
 const weekdays = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
 
@@ -517,11 +518,12 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
                   </button>
                 </form>
               )}
-              <form action={markAdminWarnedAction}>
-                <ContextFields date={date} view={view} id={detail.id} />
-                <button type="submit">Менеджер предупредил</button>
-                {detail.warnedAt && <span> · {timeLabel(detail.warnedAt)}</span>}
-              </form>
+              <WarnedCheck
+                bookingId={detail.id}
+                warnedAt={detail.warnedAt}
+                date={date}
+                view={view}
+              />
             </div>
             <h3>История</h3>
             <ol className="admin-events">

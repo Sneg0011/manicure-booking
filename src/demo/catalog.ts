@@ -3,14 +3,14 @@ export const demoMasters = [
     id: 1,
     name: 'Дарья Соколова',
     bio: 'Специализируется на аккуратном маникюре и уходе за ногтями.',
-    photo: '/photos/master-daria.jpg',
+    photo: '/photos/hand-daria.webp',
     sort: 1,
   },
   {
     id: 2,
     name: 'Милана Орлова',
     bio: 'Выполняет маникюр, педикюр и наращивание ногтей.',
-    photo: '/photos/master-milana.jpg',
+    photo: '/photos/hand-milana.webp',
     sort: 2,
   },
 ] as const;

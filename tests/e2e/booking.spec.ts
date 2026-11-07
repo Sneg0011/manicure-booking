@@ -1,5 +1,34 @@
 import { test, expect } from '@playwright/test';
 
+test('примерка покрытия меняет цвет ногтей и название', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('radio', { name: 'Вишня' }).check();
+  await expect(page.locator('.hero')).toHaveAttribute('style', /--coat: #7c0f24/);
+  await expect(page.locator('.tryon output')).toHaveText('Вишня');
+});
+
+test('быстрая запись передаёт услугу и мастера', async ({ page }) => {
+  await page.goto('/');
+  const form = page.locator('.quick-book');
+  const service = form.getByLabel('Услуга');
+  const master = form.getByLabel('Мастер');
+  await service.selectOption({ index: 1 });
+  await master.selectOption({ index: 1 });
+  const serviceId = await service.inputValue();
+  const masterId = await master.inputValue();
+  await form.getByRole('button', { name: 'Выбрать время' }).click();
+  await expect(page).toHaveURL(new RegExp(`service=${serviceId}.*master=${masterId}`));
+  await expect(page.getByRole('heading', { name: 'Когда вам удобно?' })).toBeVisible();
+});
+
+test('несуществующий адрес показывает русскую страницу 404', async ({ page }) => {
+  await page.goto('/does-not-exist-for-test');
+  await expect(page.getByRole('heading', { name: 'Такой страницы нет' })).toBeVisible();
+  await expect(page.getByText('Возможно, ссылка устарела или в ней опечатка')).toBeVisible();
+  await expect(page.getByRole('link', { name: 'На главную' })).toHaveAttribute('href', '/');
+  await expect(page.getByRole('link', { name: 'Записаться' })).toHaveAttribute('href', '/book');
+});
+
 async function chooseSlot(page: import('@playwright/test').Page) {
   await page.goto('/book?service=2');
   await expect(page.getByRole('heading', { name: 'Когда вам удобно?' })).toBeVisible();
