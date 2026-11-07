@@ -15,8 +15,13 @@ export async function anonymizeExpired(deps: Deps, years = 3): Promise<number> {
       returning c.id`);
     const ids = result.rows.map((row) => Number(row.id));
     if (!ids.length) return 0;
-    const idList = sql.join(ids.map((id) => sql`${id}`), sql`, `);
-    await tx.execute(sql`delete from client_chats where booking_id in (select id from bookings where client_id in (${idList}))`);
+    const idList = sql.join(
+      ids.map((id) => sql`${id}`),
+      sql`, `,
+    );
+    await tx.execute(
+      sql`delete from client_chats where booking_id in (select id from bookings where client_id in (${idList}))`,
+    );
     await tx.execute(sql`update notifications set body = 'Текст удалён по сроку хранения'
       where booking_id in (select id from bookings where client_id in (${idList}))`);
     return ids.length;

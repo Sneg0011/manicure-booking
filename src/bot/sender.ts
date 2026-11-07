@@ -9,19 +9,44 @@ export function sanitizeTelegramError(error: unknown, token?: string): string {
 }
 
 export function createTelegramSender(api: Api): MessageSender {
-  return { async send(chatId, text, buttons) {
-    try {
-      await api.sendMessage(chatId, text, buttons?.length ? { reply_markup: { inline_keyboard: buttons.map((row) => row.map((item) =>
-        item.url ? { text: item.text, url: item.url } : { text: item.text, callback_data: item.callbackData ?? '' })) } } : {});
-    } catch (error) {
-      throw new Error(sanitizeTelegramError(error, api.token));
-    }
-  } };
+  return {
+    async send(chatId, text, buttons) {
+      try {
+        await api.sendMessage(
+          chatId,
+          text,
+          buttons?.length
+            ? {
+                reply_markup: {
+                  inline_keyboard: buttons.map((row) =>
+                    row.map((item) =>
+                      item.url
+                        ? { text: item.text, url: item.url }
+                        : { text: item.text, callback_data: item.callbackData ?? '' },
+                    ),
+                  ),
+                },
+              }
+            : {},
+        );
+      } catch (error) {
+        throw new Error(sanitizeTelegramError(error, api.token));
+      }
+    },
+  };
 }
 
 export function getSenderFromEnv(): MessageSender {
   const token = process.env.TELEGRAM_BOT_TOKEN;
-  if (!token) return { send: async () => { throw new Error('Telegram не настроен'); } };
-  const api = new Api(token, { ...(process.env.TELEGRAM_API_ROOT ? { apiRoot: process.env.TELEGRAM_API_ROOT } : {}), timeoutSeconds: 5 });
+  if (!token)
+    return {
+      send: async () => {
+        throw new Error('Telegram не настроен');
+      },
+    };
+  const api = new Api(token, {
+    ...(process.env.TELEGRAM_API_ROOT ? { apiRoot: process.env.TELEGRAM_API_ROOT } : {}),
+    timeoutSeconds: 5,
+  });
   return createTelegramSender(api);
 }

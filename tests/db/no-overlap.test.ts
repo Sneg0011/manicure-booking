@@ -10,11 +10,15 @@ beforeAll(async () => {
   pool = testDb.pool;
   close = testDb.close;
   await pool.query("INSERT INTO masters (id, name) VALUES (1, 'Первый'), (2, 'Второй')");
-  await pool.query("INSERT INTO services (id, name, duration_min, price_rub) VALUES (1, 'Маникюр', 60, 1000)");
+  await pool.query(
+    "INSERT INTO services (id, name, duration_min, price_rub) VALUES (1, 'Маникюр', 60, 1000)",
+  );
   await pool.query("INSERT INTO clients (id, name) VALUES (1, 'Клиент')");
 });
 
-afterAll(async () => { if (close) await close(); });
+afterAll(async () => {
+  if (close) await close();
+});
 
 async function insert(masterId: number, from: string, until: string, status = 'active') {
   const token = crypto.randomUUID();
@@ -51,9 +55,13 @@ test('отменённая запись не занимает время', async
 // одновременные вставки могут ждать друг друга. Одну из них база прерывает с кодом 40P01.
 // Это такой же отказ, как 23P01: вторая запись не появляется.
 test('20 параллельных вставок: 1 успешна, 19 отклонены запретом или взаимной блокировкой', async () => {
-  const results = await Promise.allSettled(Array.from({ length: 20 }, () => insert(2, '18:00', '19:00')));
+  const results = await Promise.allSettled(
+    Array.from({ length: 20 }, () => insert(2, '18:00', '19:00')),
+  );
   expect(results.filter((result) => result.status === 'fulfilled')).toHaveLength(1);
-  const rejected = results.filter((result): result is PromiseRejectedResult => result.status === 'rejected');
+  const rejected = results.filter(
+    (result): result is PromiseRejectedResult => result.status === 'rejected',
+  );
   expect(rejected).toHaveLength(19);
   expect(rejected.every((result) => ['23P01', '40P01'].includes(result.reason?.code))).toBe(true);
   const { rows } = await pool.query(

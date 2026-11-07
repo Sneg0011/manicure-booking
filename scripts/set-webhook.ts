@@ -12,9 +12,14 @@ url.search = '';
 url.hash = '';
 const root = process.env.TELEGRAM_API_ROOT ?? 'https://api.telegram.org';
 const response = await fetch(`${root.replace(/\/$/, '')}/bot${token}/setWebhook`, {
-  method: 'POST', headers: { 'content-type': 'application/json' },
-  body: JSON.stringify({ url: url.toString(), secret_token: secret, allowed_updates: ['message', 'callback_query'] }),
+  method: 'POST',
+  headers: { 'content-type': 'application/json' },
+  body: JSON.stringify({
+    url: url.toString(),
+    secret_token: secret,
+    allowed_updates: ['message', 'callback_query'],
+  }),
 });
-const body = await response.json() as { ok?: boolean };
+const body = (await response.json()) as { ok?: boolean };
 if (!response.ok || !body.ok) throw new Error('Не удалось установить webhook');
 console.log('Webhook установлен');

@@ -9,10 +9,25 @@ import { masters } from '../../src/db/schema';
 let fixture: Awaited<ReturnType<typeof createTestDb>>;
 let d: ReturnType<typeof deps>;
 let bot: ReturnType<typeof testBot>;
-beforeEach(async () => { fixture = await createTestDb(); await seedFixtures(fixture.db); d = deps(fixture.db, { current: at('09:00') }); bot = testBot(d); });
-afterEach(async () => { if (fixture) await fixture.close(); });
+beforeEach(async () => {
+  fixture = await createTestDb();
+  await seedFixtures(fixture.db);
+  d = deps(fixture.db, { current: at('09:00') });
+  bot = testBot(d);
+});
+afterEach(async () => {
+  if (fixture) await fixture.close();
+});
 async function create(masterId: number, date = '2026-12-07') {
-  const result = await createBooking(d, { serviceId: 1, masterId, start: at('12:00', date), name: `Клиент ${masterId}`, phone: `+7900000000${masterId}`, idempotencyKey: `${masterId}-${date}`, actor: 'client_site' });
+  const result = await createBooking(d, {
+    serviceId: 1,
+    masterId,
+    start: at('12:00', date),
+    name: `Клиент ${masterId}`,
+    phone: `+7900000000${masterId}`,
+    idempotencyKey: `${masterId}-${date}`,
+    actor: 'client_site',
+  });
   if (!result.ok) throw new Error(result.error);
 }
 
@@ -25,8 +40,12 @@ test('master invitation is exact, private and independent for both masters', asy
   expect(texts(bot.calls).at(-1)).toContain('Вы подключены как мастер Анна');
   await message(bot.bot, 302, '/start master_invite-two');
   expect(texts(bot.calls).at(-1)).toContain('Вы подключены как мастер Мария');
-  expect((await fixture.db.select().from(masters).where(eq(masters.id, 1)))[0].telegramChatId).toBe('301');
-  expect((await fixture.db.select().from(masters).where(eq(masters.id, 2)))[0].telegramChatId).toBe('302');
+  expect((await fixture.db.select().from(masters).where(eq(masters.id, 1)))[0].telegramChatId).toBe(
+    '301',
+  );
+  expect((await fixture.db.select().from(masters).where(eq(masters.id, 2)))[0].telegramChatId).toBe(
+    '302',
+  );
 });
 
 test('today and tomorrow show only own active bookings, without phones or edit buttons', async () => {

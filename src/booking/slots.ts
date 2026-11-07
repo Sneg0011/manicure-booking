@@ -12,7 +12,8 @@ export function computeDaySlots(input: {
   minLeadMin: number;
   horizonDays: number;
 }): Date[] {
-  const { date, hours, durationMin, bufferMin, busy, stepMin, now, minLeadMin, horizonDays } = input;
+  const { date, hours, durationMin, bufferMin, busy, stepMin, now, minLeadMin, horizonDays } =
+    input;
   if (hours === null) return [];
 
   const horizon = new TZDate(now.getTime(), STUDIO_TZ);
@@ -29,7 +30,13 @@ export function computeDaySlots(input: {
   for (let start = opens; start + durationMs <= closes; start += stepMin * 60_000) {
     if (start < earliest) continue;
     const occupiedUntil = start + occupiedMs;
-    if (busy.some(({ start: busyStart, end: busyEnd }) => start < busyEnd.getTime() && busyStart.getTime() < occupiedUntil)) continue;
+    if (
+      busy.some(
+        ({ start: busyStart, end: busyEnd }) =>
+          start < busyEnd.getTime() && busyStart.getTime() < occupiedUntil,
+      )
+    )
+      continue;
     slots.push(new Date(start));
   }
 

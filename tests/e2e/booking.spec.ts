@@ -1,0 +1,96 @@
+import { test, expect } from '@playwright/test';
+
+async function chooseSlot(page: import('@playwright/test').Page) {
+  await page.goto('/book?service=2');
+  await expect(page.getByRole('heading', { name: 'Когда вам удобно?' })).toBeVisible();
+  const day = page.locator('.days button:not([disabled])').first();
+  await day.click();
+  const slot = page.locator('.slot').first();
+  await expect(slot).toBeVisible();
+  await slot.click();
+  await page.getByRole('button', { name: 'Дальше' }).click();
+}
+test('главная показывает услуги, мастеров, контакты и демо', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: /Лунка, студия маникюра/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Услуги и цены' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Мастера' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Контакты' })).toBeVisible();
+  await expect(page.getByText('Демонстрационный проект.', { exact: false })).toBeVisible();
+  await expect(page.locator('body')).not.toContainText(
+    /реальные клиенты|отзывы|нам доверяют|лучшие/i,
+  );
+});
+test('запись и тестовые данные ведут на личную страницу', async ({ page }) => {
+  await chooseSlot(page);
+  await page.getByRole('button', { name: 'Подставить тестовые данные' }).click();
+  await expect(page.getByLabel('Телефон')).toHaveValue(/^\+7000\d{7}$/);
+  await page.getByRole('button', { name: 'Записаться' }).click();
+  await expect(page).toHaveURL(/\/b\/[^/]+\?new=1/);
+  await expect(page.getByRole('heading', { name: 'Вы записаны' })).toBeVisible();
+  await expect(page.getByText('Лунный переулок, 7')).toBeVisible();
+  await expect(
+    page.getByText('Если подключите бота, в базе сохранится ваш Telegram ID.', { exact: false }),
+  ).toBeVisible();
+});
+test('воскресенье не нажимается, время всегда МСК', async ({ browser }) => {
+  const context = await browser.newContext({ timezoneId: 'Asia/Vladivostok' });
+  const page = await context.newPage();
+  await page.goto('/book?service=2');
+  await expect(page.getByRole('button', { name: /выходной/ }).first()).toBeDisabled();
+  await page.locator('.days button:not([disabled])').first().click();
+  await page.locator('.slot').first().click();
+  await expect(page.locator('.booking-bottom')).toContainText('МСК');
+  await context.close();
+});
+test('сброс демо во время заполнения даёт понятный отказ', async ({ page, request }) => {
+  await chooseSlot(page);
+  await page.getByRole('button', { name: 'Подставить тестовые данные' }).click();
+  await request.get('/api/cron/daily', { headers: { authorization: 'Bearer test-cron-secret' } });
+  await page.getByRole('button', { name: 'Записаться' }).click();
+  await expect(page.locator('.booking-error')).toContainText('Данные демо обновились');
+});
+test('390 px без горизонтальной прокрутки', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const path of ['/', '/book']) {
+    await page.goto(path);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+      390,
+    );
+  }
+});
+test('два браузера выбирают одно время: второй получает варианты', async ({ browser }) => {
+  const firstContext = await browser.newContext();
+  const secondContext = await browser.newContext();
+  const first = await firstContext.newPage();
+  const second = await secondContext.newPage();
+  await Promise.all([chooseSlot(first), chooseSlot(second)]);
+  await first.getByRole('button', { name: 'Подставить тестовые данные' }).click();
+  await second.getByRole('button', { name: 'Подставить тестовые данные' }).click();
+  await first.getByRole('button', { name: 'Записаться' }).click();
+  await expect(first).toHaveURL(/\/b\//);
+  await second.getByRole('button', { name: 'Записаться' }).click();
+  await expect(second.locator('.booking-error')).toContainText('Это время только что заняли');
+  await expect(second.getByText('Другие свободные варианты:')).toBeVisible();
+  await firstContext.close();
+  await secondContext.close();
+});
+test('занятое время исчезает из списка для следующего посетителя', async ({ page, browser }) => {
+  await page.goto('/book?service=2');
+  await page.getByRole('button', { name: 'Дарья' }).click();
+  await page.locator('.days button:not([disabled])').first().click();
+  const slot = page.locator('.slot').first();
+  const label = await slot.getAttribute('aria-label');
+  await slot.click();
+  await page.getByRole('button', { name: 'Дальше' }).click();
+  await page.getByRole('button', { name: 'Подставить тестовые данные' }).click();
+  await page.getByRole('button', { name: 'Записаться' }).click();
+  await expect(page).toHaveURL(/\/b\//);
+  const other = await browser.newPage();
+  await other.goto('/book?service=2');
+  await other.getByRole('button', { name: 'Дарья' }).click();
+  await other.locator('.days button:not([disabled])').first().click();
+  await expect(other.locator('.slot').first()).toBeVisible();
+  await expect(other.locator(`.slot[aria-label="${label}"]`)).toHaveCount(0);
+  await other.close();
+});

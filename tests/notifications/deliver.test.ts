@@ -18,23 +18,39 @@ beforeEach(async () => {
   d = deps(db, { current: BASE_NOW });
   serial = 0;
 });
-afterEach(async () => { if (close) await close(); });
+afterEach(async () => {
+  if (close) await close();
+});
 
 async function create(name = 'Клиент <b>x</b>') {
-  const result = await createBooking(d, { serviceId: 1, masterId: 1, start: at('10:00'), name,
-    phone: '+79001234567', idempotencyKey: `deliver-${++serial}`, actor: 'manager' });
+  const result = await createBooking(d, {
+    serviceId: 1,
+    masterId: 1,
+    start: at('10:00'),
+    name,
+    phone: '+79001234567',
+    idempotencyKey: `deliver-${++serial}`,
+    actor: 'manager',
+  });
   expect(result.ok).toBe(true);
   if (!result.ok) throw new Error(result.error);
   return result.value;
 }
-function fake(failChat?: string): MessageSender & { calls: { chatId: string; text: string; buttons: unknown }[] } {
+function fake(
+  failChat?: string,
+): MessageSender & { calls: { chatId: string; text: string; buttons: unknown }[] } {
   const calls: { chatId: string; text: string; buttons: unknown }[] = [];
-  return { calls, async send(chatId, text, buttons) {
-    calls.push({ chatId, text, buttons });
-    if (chatId === failChat) throw new Error('send failed');
-  } };
+  return {
+    calls,
+    async send(chatId, text, buttons) {
+      calls.push({ chatId, text, buttons });
+      if (chatId === failChat) throw new Error('send failed');
+    },
+  };
 }
-async function rows() { return db.select().from(notifications); }
+async function rows() {
+  return db.select().from(notifications);
+}
 
 test('master without chat is not_connected', async () => {
   await create();
@@ -56,21 +72,31 @@ test('master text contains name, service, studio date and time, but no phone or 
   expect(sender.calls[0].text).toContain('10:00');
   expect(sender.calls[0].text).not.toContain('+79001234567');
   expect(sender.calls[0].buttons).toBeUndefined();
-  expect((await rows()).find((r) => r.recipient === 'master')).toMatchObject({ status: 'sent', error: null });
+  expect((await rows()).find((r) => r.recipient === 'master')).toMatchObject({
+    status: 'sent',
+    error: null,
+  });
   expect((await rows()).find((r) => r.recipient === 'master')?.sentAt).toBeInstanceOf(Date);
 });
 
 test('manager move sends to every booking chat, then repeat delivery sends nothing', async () => {
   const booking = await create();
-  await db.insert(clientChats).values([{ bookingId: booking.id, chatId: 'client-a' }, { bookingId: booking.id, chatId: 'client-b' }]);
+  await db.insert(clientChats).values([
+    { bookingId: booking.id, chatId: 'client-a' },
+    { bookingId: booking.id, chatId: 'client-b' },
+  ]);
   await moveBooking(d, { bookingId: booking.id, newStart: at('12:00'), actor: 'manager' });
   const sender = fake();
   await deliverPending(d, sender);
   expect(sender.calls.map((c) => c.chatId).sort()).toEqual(['client-a', 'client-b']);
   await deliverPending(d, sender);
   expect(sender.calls).toHaveLength(2);
-  expect((await rows()).find((r) => r.recipient === 'client' && r.channel === 'telegram')?.status).toBe('sent');
-  expect((await db.select().from(bookings).where(eq(bookings.id, booking.id)))[0].needsCall).toBeNull();
+  expect(
+    (await rows()).find((r) => r.recipient === 'client' && r.channel === 'telegram')?.status,
+  ).toBe('sent');
+  expect(
+    (await db.select().from(bookings).where(eq(bookings.id, booking.id)))[0].needsCall,
+  ).toBeNull();
 });
 
 test('failed client send persists failed row, active booking and changed call flag; other rows continue', async () => {
@@ -82,29 +108,51 @@ test('failed client send persists failed row, active booking and changed call fl
   await deliverPending(d, sender);
   const row = (await rows()).find((r) => r.recipient === 'client' && r.channel === 'telegram');
   expect(row).toMatchObject({ status: 'failed', error: 'send failed' });
-  expect((await db.select().from(bookings).where(eq(bookings.id, booking.id)))[0]).toMatchObject({ status: 'active', needsCall: 'changed' });
-  expect((await rows()).filter((r) => r.recipient === 'master' && r.status === 'sent')).toHaveLength(2);
+  expect((await db.select().from(bookings).where(eq(bookings.id, booking.id)))[0]).toMatchObject({
+    status: 'active',
+    needsCall: 'changed',
+  });
+  expect(
+    (await rows()).filter((r) => r.recipient === 'master' && r.status === 'sent'),
+  ).toHaveLength(2);
 });
 
 test('one failed client chat does not block the other chat', async () => {
   const booking = await create();
-  await db.insert(clientChats).values([{ bookingId: booking.id, chatId: 'client-a' }, { bookingId: booking.id, chatId: 'client-b' }]);
+  await db.insert(clientChats).values([
+    { bookingId: booking.id, chatId: 'client-a' },
+    { bookingId: booking.id, chatId: 'client-b' },
+  ]);
   await moveBooking(d, { bookingId: booking.id, newStart: at('12:00'), actor: 'manager' });
   const sender = fake('client-a');
   await deliverPending(d, sender);
   expect(sender.calls.map((c) => c.chatId).sort()).toEqual(['client-a', 'client-b']);
-  expect((await rows()).find((r) => r.recipient === 'client' && r.channel === 'telegram')?.status).toBe('failed');
+  expect(
+    (await rows()).find((r) => r.recipient === 'client' && r.channel === 'telegram')?.status,
+  ).toBe('failed');
 });
 
 test('31st master message in a studio day is suppressed', async () => {
   await db.update(masters).set({ telegramChatId: 'master-1' }).where(eq(masters.id, 1));
   await create();
-  await db.insert(notifications).values(Array.from({ length: 30 }, () => ({ recipient: 'master' as const, masterId: 1,
-    channel: 'telegram' as const, status: 'sent' as const, body: 'prior', sentAt: BASE_NOW })));
+  await db
+    .insert(notifications)
+    .values(
+      Array.from({ length: 30 }, () => ({
+        recipient: 'master' as const,
+        masterId: 1,
+        channel: 'telegram' as const,
+        status: 'sent' as const,
+        body: 'prior',
+        sentAt: BASE_NOW,
+      })),
+    );
   const sender = fake();
   await deliverPending(d, sender);
   expect(sender.calls).toHaveLength(0);
-  expect((await rows()).find((r) => r.recipient === 'master' && r.status === 'suppressed')).toBeDefined();
+  expect(
+    (await rows()).find((r) => r.recipient === 'master' && r.status === 'suppressed'),
+  ).toBeDefined();
 });
 
 test('parallel delivery claims pending notification once', async () => {

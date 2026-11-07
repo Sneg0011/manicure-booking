@@ -24,8 +24,11 @@ export async function createTestDb(): Promise<{ db: Db; pool: Pool; close(): Pro
     async close() {
       await pool.end();
       const cleanup = new Pool({ connectionString: adminUrl });
-      try { await cleanup.query(`DROP DATABASE "${name}"`); }
-      finally { await cleanup.end(); }
+      try {
+        await cleanup.query(`DROP DATABASE "${name}"`);
+      } finally {
+        await cleanup.end();
+      }
     },
   };
 }

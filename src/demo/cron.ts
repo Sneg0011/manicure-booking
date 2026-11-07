@@ -3,7 +3,11 @@ import type { Deps } from '../booking/types';
 import { anonymizeExpired } from '../booking/retention';
 import { resetDemo } from './reset';
 
-export async function handleDailyCron(request: Request, deps: Deps, env: { CRON_SECRET?: string; DEMO_MODE?: string }): Promise<Response> {
+export async function handleDailyCron(
+  request: Request,
+  deps: Deps,
+  env: { CRON_SECRET?: string; DEMO_MODE?: string },
+): Promise<Response> {
   const digest = (value: string) => createHash('sha256').update(value).digest();
   const actual = digest(request.headers.get('authorization') ?? '');
   const expected = digest(`Bearer ${env.CRON_SECRET ?? ''}`);

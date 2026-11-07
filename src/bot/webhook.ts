@@ -13,15 +13,31 @@ function validSecret(expected?: string, received?: string | null): boolean {
   return timingSafeEqual(a, b);
 }
 
-export async function handleTelegramWebhook(request: Request, deps: Deps, env: BotEnv & { TELEGRAM_WEBHOOK_SECRET?: string }, bot: Bot, sender: MessageSender): Promise<Response> {
-  if (!validSecret(env.TELEGRAM_WEBHOOK_SECRET, request.headers.get('X-Telegram-Bot-Api-Secret-Token')))
+export async function handleTelegramWebhook(
+  request: Request,
+  deps: Deps,
+  env: BotEnv & { TELEGRAM_WEBHOOK_SECRET?: string },
+  bot: Bot,
+  sender: MessageSender,
+): Promise<Response> {
+  if (
+    !validSecret(
+      env.TELEGRAM_WEBHOOK_SECRET,
+      request.headers.get('X-Telegram-Bot-Api-Secret-Token'),
+    )
+  )
     return new Response('Unauthorized', { status: 401 });
   try {
     await bot.handleUpdate(await request.json());
-    const safeSender: MessageSender = { send: async (chatId, text, buttons) => {
-      try { await sender.send(chatId, text, buttons); }
-      catch (error) { throw new Error(sanitizeTelegramError(error, env.TELEGRAM_BOT_TOKEN)); }
-    } };
+    const safeSender: MessageSender = {
+      send: async (chatId, text, buttons) => {
+        try {
+          await sender.send(chatId, text, buttons);
+        } catch (error) {
+          throw new Error(sanitizeTelegramError(error, env.TELEGRAM_BOT_TOKEN));
+        }
+      },
+    };
     await deliverPending(deps, safeSender);
   } catch (error) {
     console.error('Telegram webhook:', sanitizeTelegramError(error, env.TELEGRAM_BOT_TOKEN));

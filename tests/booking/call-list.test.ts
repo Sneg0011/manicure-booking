@@ -20,11 +20,25 @@ beforeEach(async () => {
   d = deps(db, clock);
   key = 0;
 });
-afterEach(async () => { if (close) await close(); });
+afterEach(async () => {
+  if (close) await close();
+});
 
-async function create(time: string, date = '2026-12-07', actor: 'client_site' | 'manager' = 'manager', masterId = 1) {
-  const result = await createBooking(d, { serviceId: 1, masterId, start: at(time, date), name: 'Клиент',
-    phone: `+79001234${String(++key).padStart(3, '0')}`, idempotencyKey: `call-${key}`, actor });
+async function create(
+  time: string,
+  date = '2026-12-07',
+  actor: 'client_site' | 'manager' = 'manager',
+  masterId = 1,
+) {
+  const result = await createBooking(d, {
+    serviceId: 1,
+    masterId,
+    start: at(time, date),
+    name: 'Клиент',
+    phone: `+79001234${String(++key).padStart(3, '0')}`,
+    idempotencyKey: `call-${key}`,
+    actor,
+  });
   expect(result.ok).toBe(true);
   if (!result.ok) throw new Error(result.error);
   return result.value;
@@ -35,10 +49,25 @@ test('remind includes today and tomorrow, excludes later, past and warned', asyn
   const tomorrow = await create('10:00', '2026-12-08');
   await create('10:00', '2026-12-09');
   expect((await getCallList(d)).map((r) => r.bookingId)).toEqual([today.id, tomorrow.id]);
-  expect((await getCallList(d))[0]).toMatchObject({ reason: 'remind', clientName: 'Клиент', clientPhone: '+79001234001', masterName: 'Анна', serviceName: 'Маникюр', status: 'active', warnedAt: null });
+  expect((await getCallList(d))[0]).toMatchObject({
+    reason: 'remind',
+    clientName: 'Клиент',
+    clientPhone: '+79001234001',
+    masterName: 'Анна',
+    serviceName: 'Маникюр',
+    status: 'active',
+    warnedAt: null,
+  });
   await markWarned(d, today.id);
   expect((await getCallList(d)).map((r) => r.bookingId)).toEqual([tomorrow.id]);
-  expect((await pool.query('SELECT actor, type FROM booking_events WHERE booking_id=$1 ORDER BY id DESC LIMIT 1', [today.id])).rows[0]).toEqual({ actor: 'manager', type: 'warned' });
+  expect(
+    (
+      await pool.query(
+        'SELECT actor, type FROM booking_events WHERE booking_id=$1 ORDER BY id DESC LIMIT 1',
+        [today.id],
+      )
+    ).rows[0],
+  ).toEqual({ actor: 'manager', type: 'warned' });
   clock.current = at('10:01');
   expect((await getCallList(d)).map((r) => r.bookingId)).toEqual([tomorrow.id]);
 });
@@ -46,10 +75,15 @@ test('remind includes today and tomorrow, excludes later, past and warned', asyn
 test('move resets warned_at and returns a due reminder', async () => {
   const booking = await create('10:00');
   await markWarned(d, booking.id);
-  expect((await moveBooking(d, { bookingId: booking.id, newStart: at('12:00'), actor: 'manager' })).ok).toBe(true);
+  expect(
+    (await moveBooking(d, { bookingId: booking.id, newStart: at('12:00'), actor: 'manager' })).ok,
+  ).toBe(true);
   expect((await getCallList(d)).find((r) => r.bookingId === booking.id)?.reason).toBe('changed');
   await markWarned(d, booking.id);
-  expect((await moveBooking(d, { bookingId: booking.id, newStart: at('13:30'), actor: 'client_site' })).ok).toBe(true);
+  expect(
+    (await moveBooking(d, { bookingId: booking.id, newStart: at('13:30'), actor: 'client_site' }))
+      .ok,
+  ).toBe(true);
   expect((await getCallList(d)).find((r) => r.bookingId === booking.id)?.reason).toBe('remind');
 });
 
@@ -59,7 +93,9 @@ test('closure crossing occupied_until remains conflict after checkbox and clears
   expect((await getCallList(d)).find((r) => r.bookingId === booking.id)?.reason).toBe('conflict');
   await markWarned(d, booking.id);
   expect((await getCallList(d)).find((r) => r.bookingId === booking.id)?.reason).toBe('conflict');
-  expect((await moveBooking(d, { bookingId: booking.id, newStart: at('12:00'), actor: 'manager' })).ok).toBe(true);
+  expect(
+    (await moveBooking(d, { bookingId: booking.id, newStart: at('12:00'), actor: 'manager' })).ok,
+  ).toBe(true);
   expect((await getCallList(d)).find((r) => r.bookingId === booking.id)?.reason).toBe('changed');
 });
 
@@ -81,7 +117,8 @@ test('reason priority yields one row per booking sorted by start', async () => {
   await db.insert(closures).values({ masterId: 1, startsAt: at('13:35'), endsAt: at('14:00') });
   const items = await getCallList(d);
   expect(items.map(({ bookingId, reason }) => ({ bookingId, reason }))).toEqual([
-    { bookingId: changed.id, reason: 'changed' }, { bookingId: conflict.id, reason: 'conflict' },
+    { bookingId: changed.id, reason: 'changed' },
+    { bookingId: conflict.id, reason: 'conflict' },
   ]);
 });
 
@@ -91,6 +128,14 @@ test('summary counts booking source, change actors and calls left', async () => 
   const manager = await create('12:00');
   await moveBooking(d, { bookingId: self.id, newStart: at('14:00'), actor: 'client_bot' });
   await cancelBooking(d, { bookingId: manager.id, actor: 'manager' });
-  expect(await getSummary(d)).toEqual({ bookingsSelf: 1, bookingsManager: 1, changesSelf: 1, changesManager: 1, callsLeft: 2 });
-  expect((await db.select().from(bookings).where(eq(bookings.id, manager.id)))[0].status).toBe('cancelled');
+  expect(await getSummary(d)).toEqual({
+    bookingsSelf: 1,
+    bookingsManager: 1,
+    changesSelf: 1,
+    changesManager: 1,
+    callsLeft: 2,
+  });
+  expect((await db.select().from(bookings).where(eq(bookings.id, manager.id)))[0].status).toBe(
+    'cancelled',
+  );
 });

@@ -3,13 +3,18 @@ import { resolve } from 'node:path';
 import EmbeddedPostgres from 'embedded-postgres';
 
 const port = Number(process.env.LOCAL_DB_PORT ?? '54320');
-if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('Некорректный LOCAL_DB_PORT');
+if (!Number.isInteger(port) || port < 1 || port > 65535)
+  throw new Error('Некорректный LOCAL_DB_PORT');
 const dir = resolve('.local/pg');
 const firstRun = !existsSync(resolve(dir, 'PG_VERSION'));
 mkdirSync(dir, { recursive: true });
 const pg = new EmbeddedPostgres({
-  databaseDir: dir, port, user: 'postgres', password: 'postgres',
-  persistent: true, postgresFlags: ['-c', 'io_method=sync'],
+  databaseDir: dir,
+  port,
+  user: 'postgres',
+  password: 'postgres',
+  persistent: true,
+  postgresFlags: ['-c', 'io_method=sync'],
   onLog: () => {},
 });
 if (firstRun) await pg.initialise();

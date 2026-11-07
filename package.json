@@ -9,12 +9,14 @@
     "start": "next start -p 3100",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:e2e": "playwright test",
     "db:start": "tsx scripts/local-db.ts",
     "db:migrate": "tsx --env-file-if-exists=.env.local src/db/migrate.ts",
     "db:seed": "tsx --env-file-if-exists=.env.local scripts/seed.ts",
     "test:unit": "vitest run --config vitest.unit.config.ts",
     "bot:webhook": "tsx --env-file-if-exists=.env.local scripts/set-webhook.ts",
-    "telegram:stub": "tsx scripts/telegram-stub.ts"
+    "telegram:stub": "tsx scripts/telegram-stub.ts",
+    "format": "prettier --write src tests scripts"
   },
   "dependencies": {
     "@date-fns/tz": "^1.5.0",
@@ -38,6 +40,7 @@
     "@types/react-dom": "^19.3.0",
     "drizzle-kit": "^0.31.11",
     "embedded-postgres": "18.6.0-beta.19",
+    "prettier": "^3.9.10",
     "tailwindcss": "^4.3.4",
     "tsx": "^4.23.15",
     "typescript": "^5.9",

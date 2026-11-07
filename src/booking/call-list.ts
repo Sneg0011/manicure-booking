@@ -42,14 +42,18 @@ export async function getCallList(deps: Deps): Promise<CallItem[]> {
       join masters m on m.id = b.master_id join services s on s.id = b.service_id
     order by b.starts_at, b.id
   `);
-  return (result.rows as unknown as (CallItem & { reason: CallItem['reason'] | null })[])
-    .filter((row) => row.reason !== null);
+  return (result.rows as unknown as (CallItem & { reason: CallItem['reason'] | null })[]).filter(
+    (row) => row.reason !== null,
+  );
 }
 
 export async function markWarned(deps: Deps, bookingId: number): Promise<void> {
   await deps.db.transaction(async (tx) => {
-    const [row] = await tx.update(bookings).set({ warnedAt: deps.now(), needsCall: null })
-      .where(eq(bookings.id, bookingId)).returning({ id: bookings.id });
+    const [row] = await tx
+      .update(bookings)
+      .set({ warnedAt: deps.now(), needsCall: null })
+      .where(eq(bookings.id, bookingId))
+      .returning({ id: bookings.id });
     if (!row) throw new Error('booking not found');
     await tx.insert(bookingEvents).values({ bookingId, actor: 'manager', type: 'warned' });
   });
