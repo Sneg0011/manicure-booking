@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Запись — Лунка</title>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Tenor+Sans&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f9f5f5;--surface:#f1e5e3;--ink:#241417;--muted:#6a5659;--polish:#b0112a;--paper:#fbf7f6;--display:'Tenor Sans',sans-serif;--text:'Golos Text',sans-serif;--margin:clamp(16px,2.2vw,32px)}
+*{box-sizing:border-box;margin:0}
+html{background:var(--bg);color:var(--ink);font:400 17px/1.5 var(--text)}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+a{color:inherit;text-decoration:none}
+.bar{display:flex;align-items:center;gap:36px;padding:22px var(--margin);font-size:15px}
+.bar b{font:400 30px/1 var(--display);letter-spacing:-.03em}
+.demo{margin-left:auto;color:var(--muted)}
+main{display:grid;grid-template-columns:minmax(300px,4fr) 8fr;gap:clamp(32px,5vw,88px);padding:clamp(24px,4vw,64px) var(--margin) 140px}
+h1{font:400 clamp(52px,7.4vw,112px)/.94 var(--display);letter-spacing:-.04em}
+.pick{margin-top:clamp(28px,3vw,48px)}
+.pick dt{color:var(--muted);font-size:15px}
+.pick dd{margin:2px 0 22px;font-size:21px;font-weight:500}
+.masters{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.masters button{padding:10px 18px;border-radius:999px;background:var(--surface);font-size:16px}
+.masters button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.days button{padding:14px 6px;text-align:center;background:var(--surface);border-radius:14px}
+.days button b{display:block;font:400 34px/1 var(--display)}
+.days button small{font-size:14px}
+.days button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+.days button[disabled]{background:none;color:var(--muted);cursor:default}
+h2{font:500 19px/1.3 var(--text);margin:clamp(28px,3vw,44px) 0 14px}
+.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:12px}
+.slot{position:relative;aspect-ratio:3/4;background:var(--surface);border-radius:46% 46% 38% 38%/30% 30% 20% 20%;display:grid;place-items:center;font-size:18px;font-weight:500;font-variant-numeric:tabular-nums;overflow:hidden;transition:transform .16s ease,background-color .16s ease}
+.slot::after{content:"";position:absolute;left:12%;right:12%;bottom:-3px;height:27%;background:var(--paper);border-radius:50% 50% 0 0/100% 100% 0 0}
+.slot span{position:relative;z-index:1;transform:translateY(-6px)}
+.slot:hover{transform:translateY(-4px)}
+.slot[aria-pressed=true]{background:var(--polish);color:#fff}
+.slot[aria-pressed=true]::after{background:#f7d5d4}
+.go{z-index:10;position:fixed;inset:auto 0 0;background:var(--ink);color:var(--paper);display:flex;justify-content:space-between;align-items:center;gap:24px;padding:16px var(--margin)}
+.go b{font-weight:500}
+.btn{background:var(--polish);color:#fff;padding:15px 30px;font-weight:500;border-radius:999px;white-space:nowrap}
+@media (max-width:760px){
+ main{display:block;padding-top:8px}
+ .demo{display:none}
+ h1{font-size:15vw}
+ .days{grid-template-columns:repeat(7,74px);overflow-x:auto;margin-top:28px;padding-bottom:6px}
+ .slots{grid-template-columns:repeat(4,1fr);gap:10px}
+ .slot{font-size:16px}
+ .go{font-size:15px}.btn{padding:13px 22px}
+}
+</style>
+</head>
+<body>
+<div class="bar"><a href="index.html"><b>лунка</b></a><span class="demo">Демо: студия и записи вымышленные</span></div>
+<main>
+  <div>
+    <h1>Когда вам удобно?</h1>
+    <dl class="pick">
+      <dt>Услуга</dt><dd>С покрытием, 1 ч 45 мин</dd>
+      <dt>Мастер</dt>
+      <dd><div class="masters"><button aria-pressed="true">Любой</button><button aria-pressed="false">Дарья</button><button aria-pressed="false">Милана</button></div></dd>
+    </dl>
+  </div>
+  <div>
+    <div class="days">
+      <button aria-pressed="false"><small>сб</small><b>7</b></button>
+      <button disabled><small>вс</small><b>8</b><small>выходной</small></button>
+      <button aria-pressed="true"><small>пн</small><b>9</b></button>
+      <button aria-pressed="false"><small>вт</small><b>10</b></button>
+      <button aria-pressed="false"><small>ср</small><b>11</b></button>
+      <button aria-pressed="false"><small>чт</small><b>12</b></button>
+      <button aria-pressed="false"><small>пт</small><b>13</b></button>
+    </div>
+    <h2>Утро</h2>
+    <div class="slots">
+      <button class="slot" aria-pressed="false"><span>10:00</span></button>
+      <button class="slot" aria-pressed="false"><span>10:30</span></button>
+      <button class="slot" aria-pressed="false"><span>11:30</span></button>
+    </div>
+    <h2>День</h2>
+    <div class="slots">
+      <button class="slot" aria-pressed="false"><span>12:00</span></button>
+      <button class="slot" aria-pressed="true"><span>14:30</span></button>
+      <button class="slot" aria-pressed="false"><span>15:00</span></button>
+      <button class="slot" aria-pressed="false"><span>15:30</span></button>
+      <button class="slot" aria-pressed="false"><span>16:00</span></button>
+    </div>
+    <h2>Вечер</h2>
+    <div class="slots">
+      <button class="slot" aria-pressed="false"><span>18:00</span></button>
+      <button class="slot" aria-pressed="false"><span>18:30</span></button>
+      <button class="slot" aria-pressed="false"><span>19:00</span></button>
+      <button class="slot" aria-pressed="false"><span>20:00</span></button>
+    </div>
+  </div>
+</main>
+<div class="go"><div><b>Понедельник, 9 ноября, 14:30</b> · Милана</div><a class="btn" href="#">Дальше</a></div>
+</body>
+</html>
