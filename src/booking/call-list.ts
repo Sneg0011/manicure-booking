@@ -42,9 +42,14 @@ export async function getCallList(deps: Deps): Promise<CallItem[]> {
       join masters m on m.id = b.master_id join services s on s.id = b.service_id
     order by b.starts_at, b.id
   `);
-  return (result.rows as unknown as (CallItem & { reason: CallItem['reason'] | null })[]).filter(
-    (row) => row.reason !== null,
-  );
+  // Drizzle отдаёт время из сырого SQL строкой, а CallItem обещает Date.
+  return (result.rows as unknown as (CallItem & { reason: CallItem['reason'] | null })[])
+    .filter((row) => row.reason !== null)
+    .map((row) => ({
+      ...row,
+      startsAt: new Date(row.startsAt),
+      warnedAt: row.warnedAt ? new Date(row.warnedAt) : null,
+    }));
 }
 
 export async function markWarned(deps: Deps, bookingId: number): Promise<void> {

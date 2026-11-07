@@ -187,6 +187,10 @@ const guardedWarn = managerAction(async (form: FormData) => {
   if (!row) finish(form, 'not_found');
   await markWarned(getDeps(), id);
   notify();
+  if (form.get('returnTo') === 'calls') {
+    revalidatePath('/admin/calls');
+    redirect('/admin/calls');
+  }
   finish(form);
 });
 export async function markAdminWarnedAction(form: FormData): Promise<void> {

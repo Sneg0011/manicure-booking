@@ -38,6 +38,22 @@ test('верные данные принимаются, любые ошибки 
   ).toEqual(wrongPassword);
 });
 
+test('удачные входы не расходуют попытки и обнуляют счётчик неудачных', async () => {
+  const ip = '192.0.2.77';
+  for (let i = 0; i < 10; i++) {
+    expect(await checkLogin(deps, ip, 'manager', 'correct', config)).toEqual({ ok: true });
+  }
+  for (let i = 0; i < 4; i++) await checkLogin(deps, ip, 'manager', 'wrong', config);
+  expect(await checkLogin(deps, ip, 'manager', 'correct', config)).toEqual({ ok: true });
+  for (let i = 0; i < 4; i++) {
+    expect(await checkLogin(deps, ip, 'manager', 'wrong', config)).toEqual({
+      ok: false,
+      error: 'Неверный логин или пароль',
+    });
+  }
+  expect(await checkLogin(deps, ip, 'manager', 'correct', config)).toEqual({ ok: true });
+});
+
 test('шестая попытка заблокирована даже с верным паролем, IP хранится хэшем', async () => {
   for (let i = 0; i < 5; i++) await checkLogin(deps, '192.0.2.55', 'manager', 'wrong', config);
   expect(await checkLogin(deps, '192.0.2.55', 'manager', 'correct', config)).toEqual({

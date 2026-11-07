@@ -24,6 +24,28 @@ afterEach(async () => {
   if (close) await close();
 });
 
+test('в списке «Позвонить» время записи и отметки это настоящие даты', async () => {
+  const result = await createBooking(d, {
+    serviceId: 1,
+    masterId: 1,
+    start: at('12:00'),
+    name: 'Клиент',
+    phone: '+79001234999',
+    idempotencyKey: 'call-dates',
+    actor: 'manager',
+  });
+  if (!result.ok) throw new Error(result.error);
+  await db.update(bookings).set({ needsCall: 'changed' }).where(eq(bookings.id, result.value.id));
+  await db
+    .update(bookings)
+    .set({ warnedAt: at('08:00') })
+    .where(eq(bookings.id, result.value.id));
+  const [item] = await getCallList(d);
+  expect(item.startsAt).toBeInstanceOf(Date);
+  expect(item.startsAt.getTime()).toBe(at('12:00').getTime());
+  expect(item.warnedAt).toBeInstanceOf(Date);
+});
+
 async function create(
   time: string,
   date = '2026-12-07',

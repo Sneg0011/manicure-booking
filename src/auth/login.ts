@@ -1,5 +1,7 @@
 import { createHash } from 'node:crypto';
+import { eq } from 'drizzle-orm';
 import type { Deps } from '../booking/types';
+import { requestLog } from '../db/schema';
 import { hit } from '../lib/rate-limit';
 import { verifyPassword } from './password';
 
@@ -18,7 +20,8 @@ export async function checkLogin(
   },
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   const ipHash = createHash('sha256').update(ip).digest('hex');
-  if (!(await hit(deps, `login:${ipHash}`, 5, 15))) return { ok: false, error: TOO_MANY_LOGINS };
+  const key = `login:${ipHash}`;
+  if (!(await hit(deps, key, 5, 15))) return { ok: false, error: TOO_MANY_LOGINS };
   if (
     !config.sessionSecret ||
     config.sessionSecret.length < 16 ||
@@ -28,5 +31,7 @@ export async function checkLogin(
     !verifyPassword(password, config.passwordHash)
   )
     return { ok: false, error: BAD_LOGIN };
+  // Лимит защищает от подбора пароля, поэтому удачный вход обнуляет счётчик этого адреса.
+  await deps.db.delete(requestLog).where(eq(requestLog.key, key));
   return { ok: true };
 }
