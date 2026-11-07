@@ -5,6 +5,7 @@ import type { Db } from '../db/client';
 import { formatStudioDate, fromStudioTime } from '../lib/time';
 import { getAvailability } from './availability';
 import { normalizePhone } from './phone';
+import { planNotifications } from '../notifications/plan';
 import { checkTime, getCandidates, getRules, horizonDate, nextStudioDate, serviceValues } from './rules';
 import type { Actor, BookingError, BookingView, CreatedBooking, Deps, Result, Slot } from './types';
 
@@ -111,6 +112,7 @@ export async function createBooking(
             idempotencyKey: input.idempotencyKey,
           }).returning({ id: bookings.id });
           await tx.insert(bookingEvents).values({ bookingId: booking.id, actor: input.actor, type: 'created' });
+          await planNotifications(tx as unknown as Db, { bookingId: booking.id, actor: input.actor, type: 'created' });
           return booking.id;
         });
         const view = await findView(deps, eq(bookings.id, bookingId));
@@ -174,6 +176,7 @@ export async function moveBooking(
       await tx.insert(bookingEvents).values({ bookingId: current.id, actor: input.actor, type: 'moved',
         before: { startsAt: current.startsAt.toISOString(), masterId: current.masterId },
         after: { startsAt: input.newStart.toISOString(), masterId } });
+      await planNotifications(tx as unknown as Db, { bookingId: current.id, actor: input.actor, type: 'moved', previousMasterId: current.masterId });
       return { ok: true, value: current.id };
     });
     if (!result.ok) return rejection(deps, result.error, serviceId, masterId, input.newStart);
@@ -207,6 +210,7 @@ export async function cancelBooking(
     await tx.update(bookings).set({ status: 'cancelled', updatedAt: new Date() }).where(eq(bookings.id, current.id));
     await tx.insert(bookingEvents).values({ bookingId: current.id, actor: input.actor, type: 'cancelled',
       before: { status: current.status }, after: { status: 'cancelled', reason: input.reason ?? null } });
+    await planNotifications(tx as unknown as Db, { bookingId: current.id, actor: input.actor, type: 'cancelled' });
     return { ok: true, value: current.id };
   });
   if (!result.ok) return result;
