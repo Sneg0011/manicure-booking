@@ -10,15 +10,69 @@ test('примерка покрытия меняет цвет ногтей и н
 test('быстрая запись передаёт услугу и мастера', async ({ page }) => {
   await page.goto('/');
   const form = page.locator('.quick-book');
-  const service = form.getByLabel('Услуга');
-  const master = form.getByLabel('Мастер');
-  await service.selectOption({ index: 1 });
-  await master.selectOption({ index: 1 });
-  const serviceId = await service.inputValue();
-  const masterId = await master.inputValue();
+  // Ищем именно кнопку: до подключения JS роль combobox есть и у настоящего select.
+  const service = form.locator('button[role=combobox][aria-label="Услуга"]');
+  const master = form.locator('button[role=combobox][aria-label="Мастер"]');
+  await service.click();
+  await page.getByRole('option', { name: /Наращивание/ }).click();
+  await master.click();
+  await page.getByRole('option', { name: /Милана/ }).click();
+  await expect(service).toContainText('Наращивание');
+  await expect(master).toContainText('Милана');
+  const serviceId = await form.locator('[name=service]').inputValue();
+  const masterId = await form.locator('[name=master]').inputValue();
   await form.getByRole('button', { name: 'Выбрать время' }).click();
   await expect(page).toHaveURL(new RegExp(`service=${serviceId}.*master=${masterId}`));
   await expect(page.getByRole('heading', { name: 'Когда вам удобно?' })).toBeVisible();
+});
+
+test('список быстрой записи работает с клавиатуры', async ({ page }) => {
+  await page.goto('/');
+  const form = page.locator('.quick-book');
+  const service = form.locator('button[role=combobox][aria-label="Услуга"]');
+  const list = page.getByRole('listbox', { name: 'Услуга' });
+  const native = form.locator('[name=service]');
+  const before = await native.inputValue();
+  await service.focus();
+  // Фокус сам плавно подводит кнопку к экрану: сверяем прокрутку уже после этого.
+  await page.waitForTimeout(1000);
+  const scrolled = await page.evaluate(() => window.scrollY);
+  await service.press('Enter');
+  await expect(list).toBeVisible();
+  // Открытие списка не должно сдвигать страницу.
+  expect(await page.evaluate(() => window.scrollY)).toBe(scrolled);
+  const firstActive = await service.getAttribute('aria-activedescendant');
+  await service.press('ArrowDown');
+  await expect(service).not.toHaveAttribute('aria-activedescendant', firstActive!);
+  await service.press('Enter');
+  await expect(list).toBeHidden();
+  await expect(native).not.toHaveValue(before);
+  const chosen = await native.inputValue();
+  await service.press('Enter');
+  await service.press('Escape');
+  await expect(native).toHaveValue(chosen);
+  await expect(list).toBeHidden();
+  await service.click();
+  await expect(list).toBeVisible();
+  await page.mouse.click(8, 8);
+  await expect(list).toBeHidden();
+});
+
+test('быстрая запись работает без JS', async ({ browser }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  try {
+    const page = await context.newPage();
+    await page.goto('/');
+    const form = page.locator('.quick-book');
+    const service = form.locator('select[name=service]');
+    await expect(service).toBeVisible();
+    await service.selectOption({ index: 1 });
+    const serviceId = await service.inputValue();
+    await form.getByRole('button', { name: 'Выбрать время' }).click();
+    await expect(page).toHaveURL(new RegExp(`service=${serviceId}`));
+  } finally {
+    await context.close();
+  }
 });
 
 test('несуществующий адрес показывает русскую страницу 404', async ({ page }) => {

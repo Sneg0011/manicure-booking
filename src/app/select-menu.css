@@ -1,0 +1,234 @@
+.select-menu {
+  position: relative;
+  min-width: 0;
+}
+.select-menu[data-open='true'] {
+  z-index: 30;
+}
+/* Селектор сильнее .admin-form button и .admin-detail button, которые задают inline-block. */
+.select-menu .select-menu-button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 44px;
+  cursor: pointer;
+  text-align: left;
+}
+.select-menu-current {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.select-menu-chevron {
+  flex: none;
+  transition: transform 170ms ease-out;
+}
+.select-menu[data-open='true'] .select-menu-chevron {
+  transform: rotate(180deg);
+}
+.select-menu-button:focus-visible {
+  outline: none;
+  border-radius: 12px;
+}
+.select-menu-native,
+.quick-book select.select-menu-native,
+.admin-form select.select-menu-native,
+.admin-settings-form select.select-menu-native {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 1px;
+  height: 1px;
+  min-width: 0;
+  min-height: 0;
+  max-width: none;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.select-menu-list {
+  position: absolute;
+  left: -14px;
+  right: -14px;
+  top: calc(100% + 10px);
+  z-index: 1;
+  min-width: min(280px, calc(100vw - 32px));
+  max-width: calc(100vw - 32px);
+  max-height: min(60svh, 400px);
+  overflow-y: auto;
+  margin: 0;
+  padding: 8px;
+  list-style: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px) scale(0.985);
+  transform-origin: top;
+  transition:
+    opacity 170ms ease-out,
+    visibility 170ms ease-out,
+    transform 170ms ease-out;
+  scrollbar-width: thin;
+}
+.select-menu[data-side='top'] .select-menu-list {
+  top: auto;
+  bottom: calc(100% + 10px);
+  transform: translateY(6px) scale(0.985);
+  transform-origin: bottom;
+}
+.select-menu[data-open='true'] .select-menu-list {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+.select-menu-option {
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background 120ms ease-out;
+}
+.select-menu-nail {
+  display: block;
+  width: 10px;
+  height: 14px;
+  border-radius: 50% 50% 42% 42% / 62% 62% 38% 38%;
+}
+.select-menu-copy {
+  min-width: 0;
+  overflow-wrap: normal;
+}
+.select-menu-copy > span,
+.select-menu-copy small {
+  display: block;
+}
+.select-menu-copy small {
+  font-size: 13px;
+}
+.select-menu-hint {
+  white-space: nowrap;
+}
+.select-menu-dark .select-menu-button {
+  padding: 0 2px 0 0;
+  border: 0;
+  background: transparent;
+  color: var(--paper);
+  font: 400 18px var(--text);
+}
+.select-menu-dark .select-menu-button {
+  transition: color 120ms ease-out;
+}
+.select-menu-dark .select-menu-button:hover,
+.select-menu-dark[data-open='true'] .select-menu-button {
+  color: var(--champagne);
+}
+.select-menu-dark .select-menu-chevron {
+  color: var(--champagne);
+}
+.select-menu-dark .select-menu-button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--w2) 75%, transparent);
+  outline-offset: 5px;
+}
+/* Сверху над полем лежит подпись: список открывается выше неё, а не поверх. */
+.select-menu-dark[data-side='top'] .select-menu-list {
+  bottom: calc(100% + 28px);
+}
+.select-menu-dark .select-menu-list {
+  border: 1px solid rgba(226, 198, 160, 0.28);
+  border-radius: 22px;
+  background: rgba(29, 20, 24, 0.94);
+  backdrop-filter: blur(18px) saturate(1.2);
+  box-shadow:
+    0 28px 70px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  color: var(--paper);
+  font: 400 17px var(--text);
+  scrollbar-color: var(--champagne) transparent;
+}
+.select-menu-dark .select-menu-copy small {
+  color: rgba(251, 247, 242, 0.62);
+}
+.select-menu-dark .select-menu-hint {
+  color: var(--champagne);
+  font-size: 15px;
+}
+.select-menu-dark .select-menu-option[data-active='true'] {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--w2) 26%, transparent),
+    color-mix(in srgb, var(--w2) 7%, transparent)
+  );
+}
+.select-menu-dark .select-menu-option[aria-selected='true'] .select-menu-nail {
+  background: linear-gradient(180deg, var(--w1), var(--w2) 55%, var(--w3));
+}
+.select-menu-light .select-menu-button {
+  min-height: 40px;
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: white;
+  color: var(--ink);
+  font: 400 15px var(--text);
+}
+.select-menu-light .select-menu-chevron {
+  color: var(--muted);
+}
+.select-menu-light .select-menu-button:hover,
+.select-menu-light[data-open='true'] .select-menu-button {
+  border-color: var(--deep);
+}
+.select-menu-light .select-menu-button:focus-visible {
+  box-shadow: 0 0 0 2px var(--deep);
+}
+.select-menu-light .select-menu-list {
+  left: 0;
+  right: auto;
+  top: calc(100% + 6px);
+  /* Поля в панели бывают узкими: список шире поля, чтобы имена не переносились. */
+  width: max-content;
+  min-width: 100%;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+  box-shadow: 0 14px 34px rgba(42, 33, 28, 0.16);
+  color: var(--ink);
+  font: 400 15px var(--text);
+  scrollbar-color: var(--muted) transparent;
+}
+.select-menu-light[data-side='top'] .select-menu-list {
+  top: auto;
+  bottom: calc(100% + 26px);
+}
+.select-menu-light .select-menu-option {
+  min-height: 40px;
+  border-radius: 4px;
+}
+.select-menu-light .select-menu-option[data-active='true'] {
+  background: var(--surface);
+}
+.select-menu-light .select-menu-option[aria-selected='true'] {
+  font-weight: 500;
+}
+.select-menu-light .select-menu-option[aria-selected='true'] .select-menu-nail {
+  background: var(--deep);
+}
+.select-menu-light .select-menu-copy small,
+.select-menu-light .select-menu-hint {
+  color: var(--muted);
+}
+@media (prefers-reduced-motion: reduce) {
+  .select-menu-list,
+  .select-menu-chevron,
+  .select-menu-option {
+    transition: none;
+  }
+}

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { SelectMenu } from '../../../select-menu';
 import { getDeps } from '../../../../lib/deps';
 import { getRules, getSchedule } from '../../../../admin/schedule';
 import { formatStudioDate, formatStudioTime } from '../../../../lib/time';
@@ -108,13 +109,15 @@ export default async function Page({
       <form action={addClosureAction} className="admin-settings-form">
         <label>
           Мастер
-          <select name="masterId">
-            {schedule.masters.map((master) => (
-              <option key={master.id} value={master.id}>
-                {master.name}
-              </option>
-            ))}
-          </select>
+          <SelectMenu
+            name="masterId"
+            label="Мастер"
+            options={schedule.masters.map((master) => ({
+              value: String(master.id),
+              label: master.name,
+            }))}
+            tone="light"
+          />
         </label>
         <label>
           С даты

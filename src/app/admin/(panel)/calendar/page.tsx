@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { randomUUID } from 'node:crypto';
+import { SelectMenu } from '../../../select-menu';
 import { and, eq, gte, lt, asc } from 'drizzle-orm';
 import { getDeps } from '../../../../lib/deps';
 import {
@@ -243,23 +244,23 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
             <input type="hidden" name="idempotencyKey" value={randomUUID()} />
             <label>
               Услуга
-              <select name="serviceId" required>
-                {serviceRows.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-              </select>
+              <SelectMenu
+                name="serviceId"
+                label="Услуга"
+                options={serviceRows.map((s) => ({ value: String(s.id), label: s.name }))}
+                required
+                tone="light"
+              />
             </label>
             <label>
               Мастер
-              <select name="masterId" required>
-                {masterRows.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.name}
-                  </option>
-                ))}
-              </select>
+              <SelectMenu
+                name="masterId"
+                label="Мастер"
+                options={masterRows.map((m) => ({ value: String(m.id), label: m.name }))}
+                required
+                tone="light"
+              />
             </label>
             <label>
               Дата
@@ -486,13 +487,14 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
                       </label>
                       <label>
                         Мастер
-                        <select name="masterId" defaultValue={detail.masterId}>
-                          {masterRows.map((m) => (
-                            <option key={m.id} value={m.id}>
-                              {m.name}
-                            </option>
-                          ))}
-                        </select>
+                        <SelectMenu
+                          key={detail.id}
+                          name="masterId"
+                          label="Мастер"
+                          options={masterRows.map((m) => ({ value: String(m.id), label: m.name }))}
+                          defaultValue={String(detail.masterId)}
+                          tone="light"
+                        />
                       </label>
                       <button type="submit">Сохранить перенос</button>
                     </form>

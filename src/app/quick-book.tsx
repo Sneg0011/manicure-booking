@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { durationText } from '../site/format';
+import { SelectMenu } from './select-menu';
 
 type Service = {
   id: number;
@@ -22,38 +23,64 @@ export function QuickBook({ services, masters }: { services: Service[]; masters:
   const best = masterId
     ? available
     : variants.map(([, value]) => value!).sort((a, b) => a.priceRub - b.priceRub)[0];
+  const price = (rub: number) => `${rub.toLocaleString('ru-RU')} ₽`;
+  const serviceOptions = services.map((item) => {
+    const offered = Object.entries(item.byMaster).filter(
+      (entry): entry is [string, { priceRub: number; durationMin: number }] => entry[1] !== null,
+    );
+    const variant = masterId
+      ? item.byMaster[masterId]
+      : offered.map(([, value]) => value).sort((a, b) => a.priceRub - b.priceRub)[0];
+    return {
+      value: String(item.id),
+      label: item.name,
+      note: variant ? durationText(variant.durationMin) : undefined,
+      hint: variant
+        ? `${masterId ? '' : 'от '}${price(variant.priceRub)}`
+        : masterId
+          ? 'нет у мастера'
+          : undefined,
+    };
+  });
+  const masterOptions = [
+    {
+      value: '',
+      label: 'Любой мастер',
+      hint: variants.length
+        ? `от ${price(Math.min(...variants.map(([, value]) => value!.priceRub)))}`
+        : undefined,
+    },
+    ...masters.map((item) => ({
+      value: String(item.id),
+      label: item.name,
+      hint: service?.byMaster[item.id] ? price(service.byMaster[item.id]!.priceRub) : 'нет услуги',
+    })),
+  ];
 
   return (
     <div className="quick-wrap">
       <form className="quick-book" action="/book" method="get">
         <label>
           Услуга
-          <select
+          <SelectMenu
             name="service"
-            value={serviceId}
-            onChange={(event) => setServiceId(Number(event.target.value))}
-          >
-            {services.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.name}
-              </option>
-            ))}
-          </select>
+            label="Услуга"
+            options={serviceOptions}
+            value={String(serviceId)}
+            onChange={(value) => setServiceId(Number(value))}
+            tone="dark"
+          />
         </label>
         <label>
           Мастер
-          <select
+          <SelectMenu
             name="master"
-            value={masterId || ''}
-            onChange={(event) => setMasterId(Number(event.target.value))}
-          >
-            <option value="">Любой мастер</option>
-            {masters.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.name}
-              </option>
-            ))}
-          </select>
+            label="Мастер"
+            options={masterOptions}
+            value={masterId ? String(masterId) : ''}
+            onChange={(value) => setMasterId(Number(value))}
+            tone="dark"
+          />
         </label>
         <div className="quick-result" aria-live="polite">
           <strong>
