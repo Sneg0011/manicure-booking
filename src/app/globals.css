@@ -5,7 +5,7 @@
   --stone: #d9cfc3;
   --deep: #2a211c;
   --ink: #231c18;
-  --muted: #74675d;
+  --muted: #665a50;
   --line: #c9bdb0;
   --rose: #9c4f6b;
   --paper: #fbf7f2;
@@ -26,6 +26,15 @@ html {
 body {
   margin: 0;
   overflow-x: clip;
+}
+b,
+strong {
+  /* Jost подключён до 500: без этого браузер рисует жирное начертание сам и текст размазывается. */
+  font-weight: 500;
+}
+a,
+button {
+  -webkit-tap-highlight-color: transparent;
 }
 button,
 input {

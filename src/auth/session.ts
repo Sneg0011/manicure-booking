@@ -55,7 +55,8 @@ export function managerAction<Args extends unknown[], Result>(
   fn: (...args: Args) => Promise<Result>,
 ) {
   return async (...args: Args): Promise<Result> => {
-    if (!(await managerSessionValid())) throw new Error('Доступ запрещён');
+    // Нет сессии: действие не выполняется, а менеджер попадает на вход, в том числе при истёкшей сессии.
+    if (!(await managerSessionValid())) redirect('/admin/login');
     return fn(...args);
   };
 }

@@ -82,7 +82,7 @@ export default async function AdminPage() {
         </table>
       </div>
       <p>
-        <Link href="/admin/calls">Позвонить →</Link>
+        <Link href="/admin/calls">Позвонить</Link>
       </p>
     </div>
   );
