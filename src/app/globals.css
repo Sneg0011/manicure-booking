@@ -985,3 +985,483 @@ p {
     font-size: 14vw;
   }
 }
+
+/* Панель менеджера */
+.admin-shell {
+  display: grid;
+  grid-template-columns: 214px minmax(0, 1fr);
+  min-height: 100svh;
+  background: var(--surface);
+  font-family: var(--text);
+  font-size: 15px;
+}
+.admin-sidebar {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  height: 100svh;
+  padding: 28px 18px;
+  border-right: 1px solid var(--line);
+  background: var(--bg);
+}
+.admin-brand {
+  font: 500 25px/1.1 var(--text);
+}
+.admin-brand small {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font: 400 13px var(--text);
+}
+.admin-sidebar nav {
+  display: grid;
+  gap: 2px;
+}
+.admin-sidebar nav a,
+.admin-sidebar button {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  text-align: left;
+  font: 400 15px var(--text);
+}
+.admin-sidebar nav a:hover,
+.admin-sidebar button:hover {
+  background: var(--stone);
+}
+.admin-demo {
+  margin-top: auto;
+  padding: 12px;
+  background: #e4d8cd;
+  color: var(--deep);
+  font-size: 13px;
+  line-height: 1.35;
+}
+.admin-main {
+  min-width: 0;
+  padding: 30px clamp(16px, 3vw, 44px);
+}
+.admin-main h1,
+.admin-login h1 {
+  font: 400 clamp(36px, 4vw, 56px)/1.15 var(--display);
+}
+.admin-main > p {
+  color: var(--muted);
+}
+.admin-calendar-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+.admin-calendar-head h1 {
+  margin-bottom: 20px;
+}
+.admin-eyebrow {
+  margin: 0 0 7px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.admin-new {
+  position: relative;
+  z-index: 3;
+  margin-top: 12px;
+}
+.admin-new summary,
+.admin-form button,
+.admin-detail button,
+.admin-login button {
+  display: inline-block;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 5px;
+  background: var(--deep);
+  color: var(--paper);
+  font: 500 14px var(--text);
+  cursor: pointer;
+  list-style: none;
+}
+.admin-new summary::-webkit-details-marker,
+.admin-detail summary::-webkit-details-marker {
+  display: none;
+}
+.admin-new[open] .admin-form {
+  position: absolute;
+  right: 0;
+  width: min(360px, calc(100vw - 32px));
+  padding: 18px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  box-shadow: 0 12px 30px #2a211c20;
+}
+.admin-form {
+  display: grid;
+  gap: 10px;
+}
+.admin-form label {
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+}
+.admin-form input,
+.admin-form select,
+.admin-login input {
+  width: 100%;
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: white;
+  color: var(--ink);
+  font: 400 15px var(--text);
+}
+.admin-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 8px 0 20px;
+}
+.admin-view,
+.admin-date-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.admin-view a,
+.admin-date-controls a {
+  padding: 7px 11px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--paper);
+}
+.admin-view a[aria-current='page'] {
+  background: var(--deep);
+  color: var(--paper);
+}
+.admin-date-controls strong {
+  padding: 0 6px;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.admin-error {
+  padding: 12px 15px;
+  background: #f3dcdf;
+  color: #842f4b;
+}
+.admin-calendar-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+.admin-calendar-content.has-detail {
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
+}
+.admin-calendar-scroll {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  border: 1px solid var(--line);
+  background: var(--paper);
+}
+.admin-day-grid {
+  display: grid;
+  grid-template-columns: 64px repeat(2, minmax(240px, 1fr));
+  min-width: 545px;
+}
+.admin-time-head,
+.admin-master-head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 10px;
+  border-bottom: 1px solid var(--line);
+  background: var(--paper);
+  font-weight: 500;
+}
+.admin-time-head {
+  color: var(--muted);
+  font-weight: 400;
+}
+.admin-master-head small {
+  display: block;
+  color: var(--rose);
+  font-weight: 400;
+}
+.admin-time-axis {
+  position: relative;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 71px,
+    var(--line) 72px
+  );
+}
+.admin-time-axis span {
+  position: absolute;
+  left: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  transform: translateY(-7px);
+}
+.admin-day-track {
+  position: relative;
+  border-left: 1px solid var(--line);
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 71px,
+    var(--line) 72px
+  );
+}
+.admin-open-range {
+  position: absolute;
+  inset-inline: 0;
+  background: #f4eee7;
+}
+.admin-closed-all,
+.admin-closure {
+  position: absolute;
+  z-index: 1;
+  inset-inline: 4px;
+  padding: 6px;
+  background: #ded8d1;
+  color: var(--muted);
+  font-size: 12px;
+}
+.admin-closed-all {
+  inset-block: 0;
+  display: grid;
+  place-items: center;
+}
+.admin-booking {
+  position: absolute;
+  z-index: 2;
+  inset-inline: 5px;
+  display: block;
+  overflow: hidden;
+  padding: 5px 7px;
+  border-left: 4px solid var(--rose);
+  border-radius: 2px;
+  background: #eddee3;
+  font-size: 13px;
+  line-height: 1.2;
+}
+.admin-booking b,
+.admin-booking span {
+  display: block;
+}
+.admin-booking.status-attended {
+  border-color: #608069;
+  background: #e0eadf;
+}
+.admin-booking.status-no_show {
+  border-color: #a87760;
+  background: #eee1d9;
+}
+.admin-booking-cancelled {
+  position: relative;
+  z-index: 2;
+  display: block;
+  margin: 4px;
+  padding: 3px 6px;
+  background: #f0ece9;
+  color: #9d9188;
+  font-size: 12px;
+  text-decoration: line-through;
+}
+.admin-week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(150px, 1fr));
+  min-width: 1050px;
+}
+.admin-week-day {
+  min-width: 0;
+  padding: 12px;
+  border-right: 1px solid var(--line);
+}
+.admin-week-day:last-child {
+  border: 0;
+}
+.admin-week-day h2 {
+  font: 500 15px var(--text);
+}
+.admin-week-day h3 {
+  margin: 16px 0 6px;
+  color: var(--muted);
+  font: 500 13px var(--text);
+}
+.admin-week-day p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+.admin-week-booking {
+  display: block;
+  margin: 4px 0;
+  padding: 5px;
+  border-left: 3px solid var(--rose);
+  background: #eddee3;
+  font-size: 12px;
+}
+.admin-week-booking.status-cancelled {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+.admin-week-booking.status-attended {
+  border-color: #608069;
+  background: #e0eadf;
+}
+.admin-week-booking.status-no_show {
+  border-color: #a87760;
+  background: #eee1d9;
+}
+.admin-detail {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+}
+.admin-detail h2 {
+  margin: 0 0 15px;
+  font: 500 22px var(--text);
+}
+.admin-detail h3 {
+  margin-top: 28px;
+  font: 500 18px var(--text);
+}
+.admin-detail dl {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 6px 10px;
+  margin: 0;
+  font-size: 14px;
+}
+.admin-detail dt {
+  color: var(--muted);
+}
+.admin-detail dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.admin-detail dd a {
+  text-decoration: underline;
+}
+.admin-detail-actions {
+  display: grid;
+  gap: 14px;
+  margin-top: 22px;
+}
+.admin-detail-actions form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: end;
+}
+.admin-detail-actions .admin-form {
+  display: grid;
+}
+.admin-detail-actions summary {
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+.admin-events {
+  padding-left: 22px;
+  font-size: 13px;
+}
+.admin-events li {
+  margin: 0 0 14px;
+}
+.admin-events time {
+  display: block;
+  color: var(--muted);
+}
+.admin-login {
+  width: min(400px, calc(100% - 32px));
+  margin: 10svh auto;
+  padding: 24px;
+  background: var(--surface);
+}
+.admin-login .admin-brand {
+  font: 500 18px var(--text);
+}
+.admin-login h1 {
+  margin: 20px 0;
+}
+.admin-login form {
+  display: grid;
+  gap: 10px;
+}
+.admin-login label {
+  font-size: 14px;
+}
+@media (max-width: 1100px) {
+  .admin-calendar-content.has-detail {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 700px) {
+  .admin-shell {
+    display: block;
+  }
+  .admin-sidebar {
+    position: static;
+    height: auto;
+    gap: 8px;
+    padding: 12px 16px;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .admin-sidebar .admin-brand {
+    font-size: 19px;
+  }
+  .admin-sidebar .admin-brand small {
+    display: none;
+  }
+  .admin-sidebar nav {
+    display: flex;
+    gap: 3px;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    white-space: nowrap;
+  }
+  .admin-sidebar nav a {
+    width: auto;
+    flex: none;
+    padding: 7px 10px;
+  }
+  .admin-sidebar form {
+    position: absolute;
+    top: 8px;
+    right: 16px;
+  }
+  .admin-sidebar form button {
+    width: auto;
+  }
+  .admin-demo {
+    margin: 0;
+    padding: 5px 8px;
+  }
+  .admin-main {
+    padding: 18px 16px;
+  }
+  .admin-calendar-head {
+    align-items: center;
+  }
+  .admin-calendar-head h1 {
+    font-size: 37px;
+  }
+  .admin-new {
+    margin-top: 0;
+  }
+}

@@ -16,7 +16,8 @@
     "test:unit": "vitest run --config vitest.unit.config.ts",
     "bot:webhook": "tsx --env-file-if-exists=.env.local scripts/set-webhook.ts",
     "telegram:stub": "tsx scripts/telegram-stub.ts",
-    "format": "prettier --write src tests scripts"
+    "format": "prettier --write src tests scripts",
+    "hash-password": "tsx scripts/hash-password.ts"
   },
   "dependencies": {
     "@date-fns/tz": "^1.5.0",
