@@ -12,7 +12,9 @@
     "db:start": "tsx scripts/local-db.ts",
     "db:migrate": "tsx --env-file-if-exists=.env.local src/db/migrate.ts",
     "db:seed": "tsx --env-file-if-exists=.env.local scripts/seed.ts",
-    "test:unit": "vitest run --config vitest.unit.config.ts"
+    "test:unit": "vitest run --config vitest.unit.config.ts",
+    "bot:webhook": "tsx --env-file-if-exists=.env.local scripts/set-webhook.ts",
+    "telegram:stub": "tsx scripts/telegram-stub.ts"
   },
   "dependencies": {
     "@date-fns/tz": "^1.5.0",
