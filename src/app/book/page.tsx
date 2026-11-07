@@ -10,13 +10,17 @@ export const metadata = { title: 'Запись — Лунка' };
 export default async function BookPage({
   searchParams,
 }: {
-  searchParams: Promise<{ service?: string }>;
+  searchParams: Promise<{ service?: string; master?: string }>;
 }) {
   const deps = getDeps();
   const [catalog, demoVersion] = await Promise.all([getCatalog(deps), getDemoVersion(deps)]);
   const params = await searchParams;
   const requested = Number(params.service);
   const serviceId = catalog.services.some((service) => service.id === requested) ? requested : null;
+  const requestedMaster = Number(params.master);
+  const masterId = catalog.masters.some((master) => master.id === requestedMaster)
+    ? requestedMaster
+    : null;
   const dates: string[] = [];
   for (let date = formatStudioDate(deps.now()), i = 0; i < 14; i++, date = nextStudioDate(date))
     dates.push(date);
@@ -29,14 +33,19 @@ export default async function BookPage({
         <span>Демо: студия и записи вымышленные</span>
       </div>
       <BookingForm
-        services={catalog.services.map(({ id, name, durationMin, priceRub }) => ({
-          id,
-          name,
-          durationMin,
-          priceRub,
-        }))}
+        services={catalog.services.map(
+          ({ id, name, description, category, durationMin, priceRub }) => ({
+            id,
+            name,
+            description,
+            category,
+            durationMin,
+            priceRub,
+          }),
+        )}
         masters={catalog.masters.map(({ id, name }) => ({ id, name }))}
         initialServiceId={serviceId}
+        initialMasterId={masterId}
         dates={dates}
         demoVersion={demoVersion}
       />

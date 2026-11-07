@@ -135,18 +135,16 @@ test('one failed client chat does not block the other chat', async () => {
 test('31st master message in a studio day is suppressed', async () => {
   await db.update(masters).set({ telegramChatId: 'master-1' }).where(eq(masters.id, 1));
   await create();
-  await db
-    .insert(notifications)
-    .values(
-      Array.from({ length: 30 }, () => ({
-        recipient: 'master' as const,
-        masterId: 1,
-        channel: 'telegram' as const,
-        status: 'sent' as const,
-        body: 'prior',
-        sentAt: BASE_NOW,
-      })),
-    );
+  await db.insert(notifications).values(
+    Array.from({ length: 30 }, () => ({
+      recipient: 'master' as const,
+      masterId: 1,
+      channel: 'telegram' as const,
+      status: 'sent' as const,
+      body: 'prior',
+      sentAt: BASE_NOW,
+    })),
+  );
   const sender = fake();
   await deliverPending(d, sender);
   expect(sender.calls).toHaveLength(0);

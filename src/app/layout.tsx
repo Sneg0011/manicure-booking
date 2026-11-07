@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
-import '@fontsource/tenor-sans/cyrillic-400.css';
-import '@fontsource/tenor-sans/latin-400.css';
-import '@fontsource/golos-text/cyrillic-400.css';
-import '@fontsource/golos-text/latin-400.css';
-import '@fontsource/golos-text/cyrillic-500.css';
-import '@fontsource/golos-text/latin-500.css';
-import '@fontsource/golos-text/cyrillic-600.css';
-import '@fontsource/golos-text/latin-600.css';
+import '@fontsource/prata/cyrillic-400.css';
+import '@fontsource/prata/latin-400.css';
+import '@fontsource/jost/cyrillic-300.css';
+import '@fontsource/jost/latin-300.css';
+import '@fontsource/jost/cyrillic-400.css';
+import '@fontsource/jost/latin-400.css';
+import '@fontsource/jost/cyrillic-500.css';
+import '@fontsource/jost/latin-500.css';
 import './globals.css';
 
 export const metadata: Metadata = {

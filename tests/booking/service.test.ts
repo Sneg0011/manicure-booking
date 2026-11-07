@@ -196,13 +196,11 @@ test('manager uses five-minute steps inside hours, without client lead or horizo
     () => create(at('10:00', '2026-12-13'), { actor: 'manager' }),
     'outside_schedule',
   );
-  await db
-    .insert(closures)
-    .values({
-      masterId: 2,
-      startsAt: at('14:00', '2026-12-08'),
-      endsAt: at('15:00', '2026-12-08'),
-    });
+  await db.insert(closures).values({
+    masterId: 2,
+    startsAt: at('14:00', '2026-12-08'),
+    endsAt: at('15:00', '2026-12-08'),
+  });
   await unchanged(
     () => create(at('14:05', '2026-12-08'), { actor: 'manager', masterId: 2 }),
     'outside_schedule',

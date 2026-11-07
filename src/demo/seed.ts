@@ -169,76 +169,62 @@ export async function seedDemo(deps: Deps): Promise<void> {
         updatedAt: createdAt,
       })
       .returning({ id: bookings.id });
-    await deps.db
-      .insert(bookingEvents)
-      .values({
+    await deps.db.insert(bookingEvents).values({
+      bookingId: booking.id,
+      actor: source === 'manager' ? 'manager' : 'client_site',
+      type: 'created',
+      createdAt,
+    });
+    await deps.db.insert(notifications).values({
+      bookingId: booking.id,
+      recipient: 'manager',
+      channel: 'journal',
+      body: `Создана демо-запись: ${names[index]}`,
+      status: index % 3 === 0 ? 'not_connected' : 'sent',
+      createdAt,
+    });
+    if (entry.special === 'changed' || index === 1 || index === 3) {
+      const actor = entry.special === 'changed' || index === 3 ? 'manager' : 'client_site';
+      await deps.db.insert(bookingEvents).values({
         bookingId: booking.id,
-        actor: source === 'manager' ? 'manager' : 'client_site',
-        type: 'created',
+        actor,
+        type: 'moved',
+        before: { startsAt: new Date(start.getTime() - 30 * 60_000).toISOString() },
+        after: { startsAt: start.toISOString() },
         createdAt,
       });
-    await deps.db
-      .insert(notifications)
-      .values({
+      await deps.db.insert(notifications).values({
         bookingId: booking.id,
         recipient: 'manager',
         channel: 'journal',
-        body: `Создана демо-запись: ${names[index]}`,
-        status: index % 3 === 0 ? 'not_connected' : 'sent',
+        body: `Перенесена демо-запись: ${names[index]}`,
+        status: 'sent',
         createdAt,
       });
-    if (entry.special === 'changed' || index === 1 || index === 3) {
-      const actor = entry.special === 'changed' || index === 3 ? 'manager' : 'client_site';
-      await deps.db
-        .insert(bookingEvents)
-        .values({
-          bookingId: booking.id,
-          actor,
-          type: 'moved',
-          before: { startsAt: new Date(start.getTime() - 30 * 60_000).toISOString() },
-          after: { startsAt: start.toISOString() },
-          createdAt,
-        });
-      await deps.db
-        .insert(notifications)
-        .values({
-          bookingId: booking.id,
-          recipient: 'manager',
-          channel: 'journal',
-          body: `Перенесена демо-запись: ${names[index]}`,
-          status: 'sent',
-          createdAt,
-        });
     }
     if (entry.status === 'cancelled') {
-      await deps.db
-        .insert(bookingEvents)
-        .values({
-          bookingId: booking.id,
-          actor: entry.special === 'manager_cancel' ? 'manager' : 'client_site',
-          type: 'cancelled',
-          createdAt,
-        });
-      await deps.db
-        .insert(notifications)
-        .values({
-          bookingId: booking.id,
-          recipient: 'manager',
-          channel: 'journal',
-          body: `Отменена демо-запись: ${names[index]}`,
-          status: 'sent',
-          createdAt,
-        });
+      await deps.db.insert(bookingEvents).values({
+        bookingId: booking.id,
+        actor: entry.special === 'manager_cancel' ? 'manager' : 'client_site',
+        type: 'cancelled',
+        createdAt,
+      });
+      await deps.db.insert(notifications).values({
+        bookingId: booking.id,
+        recipient: 'manager',
+        channel: 'journal',
+        body: `Отменена демо-запись: ${names[index]}`,
+        status: 'sent',
+        createdAt,
+      });
     }
     if (entry.special === 'conflict')
-      await deps.db
-        .insert(closures)
-        .values({
-          masterId: entry.masterId,
-          startsAt: new Date(start.getTime() + 10 * 60_000),
-          endsAt: new Date(start.getTime() + 25 * 60_000),
-          reason: 'Пример конфликта',
-          createdAt,
-        });
+      await deps.db.insert(closures).values({
+        masterId: entry.masterId,
+        startsAt: new Date(start.getTime() + 10 * 60_000),
+        endsAt: new Date(start.getTime() + 25 * 60_000),
+        reason: 'Пример конфликта',
+        createdAt,
+      });
   }
 }

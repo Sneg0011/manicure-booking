@@ -13,7 +13,9 @@ async function chooseSlot(page: import('@playwright/test').Page) {
 test('главная показывает услуги, мастеров, контакты и демо', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('heading', { name: /Лунка, студия маникюра/i })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Услуги и цены' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Прайс' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Работы' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Частые вопросы' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Мастера' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Контакты' })).toBeVisible();
   await expect(page.getByText('Демонстрационный проект.', { exact: false })).toBeVisible();

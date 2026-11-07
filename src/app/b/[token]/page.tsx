@@ -19,9 +19,12 @@ export default async function BookingPage({
   const { token } = await params;
   const requestHeaders = await headers();
   const host = requestHeaders.get('host');
-  const protocol = requestHeaders.get('x-forwarded-proto')?.split(',')[0]?.trim() === 'https' ? 'https' : 'http';
+  const forwardedProtocol = requestHeaders.get('x-forwarded-proto')?.split(',')[0]?.trim();
   const personalPath = `/b/${encodeURIComponent(token)}`;
-  const personalUrl = host ? `${protocol}://${host}${personalPath}` : personalPath;
+  const personalUrl =
+    host && (forwardedProtocol === 'https' || forwardedProtocol === 'http')
+      ? `${forwardedProtocol}://${host}${personalPath}`
+      : personalPath;
   const deps = getDeps();
   const booking = await getBookingByToken(deps, token);
   if (!booking) notFound();
@@ -81,7 +84,9 @@ export default async function BookingPage({
         <section className="personal-link">
           <h2>Личная ссылка</h2>
           <p>Сохраните эту ссылку: по ней можно посмотреть и изменить запись без пароля.</p>
-          <a className="personal-url" href={personalUrl}>{personalUrl}</a>
+          <a className="personal-url" href={personalUrl}>
+            {personalUrl}
+          </a>
           <ManageControls
             token={token}
             personalUrl={personalUrl}

@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лунка — студия маникюра</title>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&family=Prata&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#e8e0d7;--surface:#f3ede6;--deep:#2a211c;--ink:#231c18;--muted:#74675d;--line:#c9bdb0;--rose:#9c4f6b;--paper:#fbf7f2;
+--display:'Prata',serif;--text:'Jost',sans-serif;--m:clamp(16px,3vw,48px)}
+*{box-sizing:border-box;margin:0}
+html{background:var(--bg);color:var(--ink);font:400 18px/1.5 var(--text)}
+a{color:inherit;text-decoration:none}
+img{display:block;width:100%;height:100%;object-fit:cover}
+.label{font-size:14px;letter-spacing:.32em;text-transform:uppercase}
+.pill{display:inline-flex;align-items:center;gap:14px;background:var(--deep);color:var(--paper);border-radius:999px;padding:7px 26px 7px 7px;font-size:17px;white-space:nowrap}
+.pill i{width:38px;height:38px;border-radius:50%;background:var(--paper);color:var(--deep);display:grid;place-items:center;font-style:normal;font-size:18px}
+.pill.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.pill.rose{background:var(--rose)}
+
+/* первый экран */
+.hero{position:relative;height:100svh;min-height:680px;overflow:hidden;background:var(--bg)}
+.stone{position:absolute;left:-14vw;top:-30vh;width:62vw;height:62vw;border-radius:50%;background:#d9cfc3}
+.bar .pill{margin-left:auto}.bar{position:absolute;z-index:4;inset:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:22px var(--m)}
+.bar nav{display:flex;gap:30px;font-size:16px}
+.word{--fs:calc((100vw - 2*var(--m) - var(--gap))/3.74);--gap:15vw;position:absolute;z-index:3;left:var(--m);right:var(--m);top:32%;display:flex;justify-content:space-between;align-items:flex-start;font:400 var(--fs)/.9 var(--display);letter-spacing:-.02em}
+.word>span{display:block}.slot{position:relative;width:var(--gap);height:1px}
+.nail{position:absolute;left:50%;transform:translateX(-50%);top:calc(-32svh - 3vh);height:86svh;width:auto;max-width:none}
+.sub{position:absolute;z-index:2;left:var(--m);top:calc(32% + 19.5vw)}
+.intro{position:absolute;z-index:2;left:var(--m);top:13%;max-width:21em;font-size:19px}
+.cta{position:absolute;z-index:4;right:var(--m);bottom:40px;display:flex;align-items:center;gap:20px}
+.cta p{text-align:right;line-height:1.3}
+.cta small{display:block;color:var(--muted);font-size:15px}
+
+/* прайс */
+.price{display:grid;grid-template-columns:7fr 5fr;gap:clamp(32px,4vw,64px);padding:clamp(64px,8vw,120px) var(--m);background:var(--surface)}
+.price h2{font:400 clamp(64px,10vw,150px)/1 var(--display);letter-spacing:-.01em}
+.tabs{display:flex;gap:10px;margin:26px 0 30px}
+.tabs b{font-weight:400;padding:9px 24px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--line)}
+.tabs b.on{background:var(--deep);color:var(--paper);box-shadow:none}
+table{width:100%;border-collapse:collapse}
+th{font:400 14px var(--text);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);text-align:right;padding:0 0 10px 18px}
+th:first-child{text-align:left;padding-left:0}
+td{padding:18px 0 18px 18px;text-align:right;vertical-align:top;border-top:1px solid var(--line);font-size:22px;font-family:var(--display);white-space:nowrap}
+td:first-child{text-align:left;padding-left:0;white-space:normal;font-size:24px}
+td small{display:block;font:400 16px/1.35 var(--text);color:var(--muted);margin-top:4px;max-width:30em}
+td.t{font:400 16px var(--text);color:var(--muted)}
+.price figure{margin:0;position:sticky;top:24px;height:min(86vh,860px)}
+
+/* работы */
+.works{padding:clamp(64px,8vw,120px) var(--m)}
+.works h2,.team h2,.steps h2,.faq h2{font:400 clamp(44px,6vw,92px)/1.02 var(--display)}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;margin-top:36px}
+.grid figure{margin:0}
+.grid figcaption{margin-top:8px;font-size:16px;color:var(--muted)}
+.a{grid-column:1/6}.a div{aspect-ratio:4/5}
+.b{grid-column:6/9;margin-top:90px}.b div{aspect-ratio:3/4}
+.c{grid-column:9/13}.c div{aspect-ratio:4/5}
+
+@media(max-width:760px){
+ .bar nav{display:none}
+ .word{top:36%;--gap:21vw}
+ .nail{top:calc(-36svh - 3vh);height:66svh}
+ .intro{top:auto;bottom:108px;right:var(--m);font-size:17px}
+ .sub{top:calc(36% + 21vw)}
+ .cta{left:var(--m);justify-content:space-between;bottom:24px}.cta p{text-align:left;font-size:16px}.cta small{white-space:nowrap}.cta .pill{padding-right:18px;font-size:16px}
+ .stone{width:120vw;height:120vw;left:-40vw;top:-40vw}
+ .price{display:block}
+ .price figure{position:static;height:110vw;margin-top:28px}
+ .hidem{display:none}
+ td{font-size:18px}td:first-child{font-size:20px}
+ .grid{display:block}.grid figure{margin:0 0 18px}.b{width:72%;margin-left:auto!important}
+}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="stone"></div>
+  <div class="bar">
+    <nav><a>Прайс</a><a>Работы</a><a>Мастера</a><a>Контакты</a></nav>
+    <a class="pill" href="#"><i>↗</i>Записаться</a>
+  </div>
+  <p class="intro">Маникюр и педикюр у двух мастеров. Запись онлайн, только на свободное время.</p>
+  <h1 class="word" aria-label="Лунка"><span>ЛУ</span><span class="slot" aria-hidden="true"><svg class="nail" viewBox="0 0 300 1000" aria-hidden="true">
+    <defs>
+      <linearGradient id="skin" x1="0" x2="1"><stop offset="0" stop-color="#b98468"/><stop offset=".22" stop-color="#dcae93"/><stop offset=".55" stop-color="#e6bda3"/><stop offset=".85" stop-color="#d2a083"/><stop offset="1" stop-color="#a97458"/></linearGradient>
+      <linearGradient id="gel" x1="0" x2="1"><stop offset="0" stop-color="#d59f83"/><stop offset=".12" stop-color="#eec5ad"/><stop offset=".5" stop-color="#f6d8c6"/><stop offset=".86" stop-color="#ecbfa6"/><stop offset="1" stop-color="#c58d70"/></linearGradient>
+      <linearGradient id="tip" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".8" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity=".75"/></linearGradient>
+      <filter id="soft" x="-40%" y="-10%" width="180%" height="120%"><feGaussianBlur stdDeviation="16"/></filter>
+      <filter id="blur3"><feGaussianBlur stdDeviation="3"/></filter>
+    </defs>
+    <path d="M38 -20 C34 120 40 210 66 250 L234 250 C260 210 266 120 262 -20Z" fill="url(#skin)"/>
+    <path d="M70 215 C70 150 110 118 150 118 C190 118 230 150 230 215 C238 500 196 860 164 958 C158 978 142 978 136 958 C104 860 62 500 70 215Z" fill="#6b4634" opacity=".34" filter="url(#soft)" transform="translate(16 18)"/>
+    <path d="M66 214 C66 146 108 112 150 112 C192 112 234 146 234 214 C242 500 198 860 165 958 C158 980 142 980 135 958 C102 860 58 500 66 214Z" fill="url(#gel)"/>
+    <path d="M84 196 C92 150 120 130 150 130 C180 130 208 150 216 196 C190 176 110 176 84 196Z" fill="#fff4ec" opacity=".78" filter="url(#blur3)"/>
+    <path d="M192 190 C198 460 180 760 158 930 C166 760 182 470 178 190Z" fill="#fff" opacity=".92" filter="url(#blur3)"/>
+    <path d="M100 230 C104 420 118 620 132 780 C112 620 92 420 90 230Z" fill="#fff" opacity=".28" filter="url(#blur3)"/>
+    <path d="M66 214 C66 146 108 112 150 112 C192 112 234 146 234 214 C242 500 198 860 165 958 C158 980 142 980 135 958 C102 860 58 500 66 214Z" fill="url(#tip)"/>
+  </svg></span><span>НКА</span></h1>
+  <p class="sub label">Студия маникюра</p>
+  
+  <div class="cta">
+    <p><small>Ближайшее свободное</small>сегодня, 18:30 МСК</p>
+    <a class="pill rose" href="#"><i>↗</i>Выбрать время</a>
+  </div>
+</header>
+
+<section class="price">
+  <div>
+    <h2>ПРАЙС</h2>
+    <div class="tabs"><b class="on">Маникюр</b><b>Педикюр</b><b>Ремонт</b></div>
+    <table>
+      <tr><th>Услуга</th><th>Дарья</th><th>Милана</th><th class="hidem">Время</th></tr>
+      <tr><td>Без покрытия<small>Снятие старого покрытия, обработка кутикулы, форма</small></td><td>1 400 ₽</td><td>1 400 ₽</td><td class="t hidem">45 мин</td></tr>
+      <tr><td>С покрытием<small>Маникюр, укрепление, покрытие гель-лаком</small></td><td>2 600 ₽</td><td>2 900 ₽</td><td class="t hidem">1 ч 45 мин</td></tr>
+      <tr><td>Снятие и новое покрытие<small>Снятие, выравнивание, покрытие на ваши ногти</small></td><td>3 000 ₽</td><td>3 000 ₽</td><td class="t hidem">2 ч 15 мин</td></tr>
+      <tr><td>Наращивание<small>Гелевое наращивание длины, форма и покрытие</small></td><td>4 200 ₽</td><td>4 800 ₽</td><td class="t hidem">от 2 ч 45 мин</td></tr>
+    </table>
+  </div>
+  <figure><img src="https://images.pexels.com/photos/6941115/pexels-photo-6941115.jpeg?auto=compress&cs=tinysrgb&w=1100" alt="Руки с нюдовым маникюром на белой ткани"></figure>
+</section>
+
+<section class="works">
+  <h2>Работы</h2>
+  <div class="grid">
+    <figure class="a"><div><img src="https://images.pexels.com/photos/30691552/pexels-photo-30691552.jpeg?auto=compress&cs=tinysrgb&w=1000" alt=""></div><figcaption>Вишня, длинный миндаль</figcaption></figure>
+    <figure class="b"><div><img src="https://images.pexels.com/photos/34941685/pexels-photo-34941685.jpeg?auto=compress&cs=tinysrgb&w=800" alt=""></div><figcaption>Нюд, короткая длина</figcaption></figure>
+    <figure class="c"><div><img src="https://images.pexels.com/photos/10146052/pexels-photo-10146052.jpeg?auto=compress&cs=tinysrgb&w=1000" alt=""></div><figcaption>Розовый миндаль</figcaption></figure>
+  </div>
+</section>
+</body>
+</html>

@@ -54,6 +54,7 @@ export const masters = pgTable('masters', {
 export const services = pgTable('services', {
   id: serial('id').primaryKey(),
   name: text('name').notNull(),
+  category: text('category').notNull().default('Маникюр'),
   description: text('description'),
   durationMin: integer('duration_min').notNull(),
   bufferMin: integer('buffer_min').notNull().default(15),

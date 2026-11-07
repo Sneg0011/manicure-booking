@@ -1,22 +1,12 @@
 export const photoCredits = [
+  { label: 'Прайс', url: 'https://www.pexels.com/photo/6941115/' },
+  { label: 'Вишня', url: 'https://www.pexels.com/photo/30691552/' },
+  { label: 'Нюд', url: 'https://www.pexels.com/photo/34941685/' },
+  { label: 'Розовый миндаль', url: 'https://www.pexels.com/photo/10146052/' },
+  { label: 'Дарья', url: 'https://www.pexels.com/photo/15001876/' },
   {
-    label: 'Главное фото — » Zitona «, CC BY 2.0 (надпись на флаконе заретуширована)',
-    url: 'https://commons.wikimedia.org/wiki/File:Red_nail_polish_in_application.jpg',
+    label: 'Милана',
+    url: 'https://www.pexels.com/photo/elegant-manicured-hands-with-gold-jewelry-34373403/',
   },
-  {
-    label: 'Флакон — Disco-Dan, CC BY 2.0',
-    url: 'https://commons.wikimedia.org/wiki/File:Bottle_of_red_polish.jpg',
-  },
-  {
-    label: 'Мастер за работой — Shixart1985, CC BY 2.0',
-    url: 'https://commons.wikimedia.org/wiki/File:Nail_technician_applies_a_nail_design_at_a_manicure_table_during_a_salon_appointment.jpg',
-  },
-  {
-    label: 'Коралловые ногти — rawpixel, CC0',
-    url: 'https://www.rawpixel.com/image/5960303/free-public-domain-cc0-photo',
-  },
-  {
-    label: 'Рука — rawpixel, CC0',
-    url: 'https://www.rawpixel.com/image/5972117/close-female-hand-with-manicured-nails',
-  },
+  { label: 'Кисть', url: 'https://www.pexels.com/photo/6954964/' },
 ];

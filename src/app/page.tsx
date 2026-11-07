@@ -1,14 +1,15 @@
 import Image from 'next/image';
-import Link from 'next/link';
 import { getDeps } from '../lib/deps';
 import { getNextFreeSlot } from '../booking/next-slot';
-import { getRules } from '../booking/rules';
-import { nextStudioDate } from '../booking/rules';
+import { getRules, nextStudioDate } from '../booking/rules';
 import { formatStudioDate, formatStudioTime } from '../lib/time';
 import { getCatalog } from '../site/catalog';
-import { durationText, dateText } from '../site/format';
+import { dateText } from '../site/format';
 import { photoCredits } from '../lib/photo-credits';
 import { Reveal } from './reveal';
+import { Nail } from './nail';
+import { Pill } from './pill';
+import { PriceTabs } from './price-tabs';
 
 export const dynamic = 'force-dynamic';
 export default async function Home() {
@@ -21,164 +22,225 @@ export default async function Home() {
   const today = formatStudioDate(deps.now());
   const nextLabel = next
     ? `${formatStudioDate(next.start) === today ? 'сегодня' : formatStudioDate(next.start) === nextStudioDate(today) ? 'завтра' : dateText(formatStudioDate(next.start))}, ${formatStudioTime(next.start)} МСК`
-    : null;
+    : 'Сейчас свободного времени нет';
+  const workPhotos = [
+    {
+      src: '/photos/work-cherry.jpg',
+      width: 1600,
+      height: 2400,
+      alt: 'Вишнёвый маникюр на длинных миндалевидных ногтях',
+      caption: 'Вишня, длинный миндаль',
+    },
+    {
+      src: '/photos/work-pearl.jpg',
+      width: 1600,
+      height: 2131,
+      alt: 'Нюдовый маникюр на коротких ногтях',
+      caption: 'Нюд, короткая длина',
+    },
+    {
+      src: '/photos/work-rose.jpg',
+      width: 1600,
+      height: 2400,
+      alt: 'Розовый маникюр на миндалевидных ногтях',
+      caption: 'Розовый миндаль',
+    },
+  ];
   return (
     <>
       <Reveal />
       <main>
         <header className="hero" id="top">
-          <Image
-            src="/photos/hero.jpg"
-            alt="Рука наносит красный лак на ноготь рядом с флаконом"
-            width={1920}
-            height={1282}
-            priority
-            className="hero-photo"
-          />
+          <div className="stone" aria-hidden="true" />
           <div className="hero-bar">
-            <Link className="moon" href="/" aria-label="Лунка, на главную" />
             <nav aria-label="Разделы">
-              <a href="#services">Услуги и цены</a>
+              <a href="#price">Прайс</a>
+              <a href="#works">Работы</a>
               <a href="#masters">Мастера</a>
-              <a href="#how">Как изменить запись</a>
               <a href="#contacts">Контакты</a>
             </nav>
+            <Pill href="/book">Записаться</Pill>
           </div>
-          <Link className="button hero-book" href="/book">
-            Записаться
-          </Link>
-          <div className="hero-foot">
-            <div className="hero-lead">
-              <p>
-                Студия маникюра на двух мастеров.
-                <br />
-                Запись онлайн, только на свободное время.
-              </p>
-              {nextLabel && <p className="hero-next">Ближайшее свободное время: {nextLabel}</p>}
-            </div>
-            <h1 aria-label="Лунка, студия маникюра">лунка</h1>
+          <p className="hero-intro">
+            Маникюр и педикюр у двух мастеров. Запись онлайн, только на свободное время.
+          </p>
+          <h1 className="hero-word" aria-label="Лунка, студия маникюра">
+            <span>ЛУ</span>
+            <span className="nail-place" aria-hidden="true">
+              <Nail />
+            </span>
+            <span>НКА</span>
+          </h1>
+          <p className="hero-sub">Студия маникюра</p>
+          <div className="hero-cta">
+            <p>
+              <small>Ближайшее свободное</small>
+              {nextLabel}
+            </p>
+            <Pill href="/book" rose>
+              Выбрать время
+            </Pill>
           </div>
         </header>
-        <section className="service-list" id="services">
-          <h2 className="reveal">Услуги и цены</h2>
-          {catalog.services.map((service) => (
-            <Link
-              className="service-row reveal"
-              key={service.id}
-              href={`/book?service=${service.id}`}
-            >
-              <strong>{service.name}</strong>
-              <span>
-                {durationText(service.durationMin)} · {service.variedPrice ? 'от ' : ''}
-                {service.priceRub.toLocaleString('ru-RU')} ₽
-              </span>
-            </Link>
-          ))}
+        <section className="price-section" id="price">
+          <div className="price-copy">
+            <h2 className="reveal">ПРАЙС</h2>
+            <PriceTabs groups={catalog.categories} masters={catalog.masters} />
+          </div>
+          <figure className="price-photo reveal">
+            <Image
+              src="/photos/price-hands.jpg"
+              width={1600}
+              height={1067}
+              alt="Руки с нюдовым маникюром на светлой ткани"
+            />
+          </figure>
+        </section>
+        <section className="works-section" id="works">
+          <h2 className="reveal">Работы</h2>
+          <div className="works-grid">
+            {workPhotos.map((photo, i) => (
+              <figure className={`work work-${i + 1} reveal`} key={photo.src}>
+                <Image src={photo.src} width={photo.width} height={photo.height} alt={photo.alt} />
+                <figcaption>{photo.caption}</figcaption>
+              </figure>
+            ))}
+          </div>
         </section>
         <section className="masters-section" id="masters">
-          <h2 className="masters-title reveal">Мастера</h2>
-          <div className="portrait-list">
-            {catalog.masters.map((master, index) => (
-              <article className="portrait reveal" key={master.id}>
+          <h2 className="reveal">Мастера</h2>
+          <div className="master-grid">
+            {catalog.masters.map((master, i) => (
+              <article className={`master-card master-${i + 1} reveal`} key={master.id}>
                 <Image
-                  src={index === 0 ? '/photos/technician.jpg' : '/photos/coral-nails.webp'}
-                  alt={index === 0 ? 'Мастер за работой' : 'Коралловый маникюр'}
-                  width={index === 0 ? 1920 : 1024}
-                  height={index === 0 ? 2876 : 768}
+                  src={master.photo ?? ''}
+                  width={1600}
+                  height={i === 0 ? 2400 : 2133}
+                  alt={
+                    i === 0
+                      ? 'Руки с аккуратным маникюром на светлом фоне'
+                      : 'Руки с маникюром и золотыми украшениями'
+                  }
                 />
                 <h3>{master.name}</h3>
                 <p>{master.bio}</p>
+                <Pill href={`/book?master=${master.id}`}>
+                  Записаться к {master.name.split(' ')[0] === 'Дарья' ? 'Дарье' : 'Милане'}
+                </Pill>
               </article>
             ))}
           </div>
         </section>
         <section className="how-section" id="how">
-          <div className="how-grid">
-            <div className="how-step reveal">
-              <h2>Сначала вы выбираете время.</h2>
+          <figure className="how-photo reveal">
+            <Image
+              src="/photos/howto-brush.jpg"
+              width={1600}
+              height={1067}
+              alt="Кисть наносит покрытие на ноготь"
+            />
+          </figure>
+          <div>
+            <h2 className="reveal">Как устроена запись</h2>
+            <div className="how-row reveal">
+              <h3>Выбираете время</h3>
               <p>Видно только свободное: занятое время на сайте не показывается.</p>
             </div>
-            <div className="how-step reveal">
-              <h3>Потом получаете личную ссылку.</h3>
+            <div className="how-row reveal">
+              <h3>Получаете личную ссылку</h3>
               <p>По ней запись можно посмотреть без пароля. Можно подключить Telegram.</p>
             </div>
-            <div className="how-step reveal">
-              <h3>Передумали? Перенесите сами.</h3>
+            <div className="how-row reveal">
+              <h3>Переносите сами</h3>
               <p>
                 До {rules.maxClientMoves} раз и не позже чем за {rules.changeCutoffMin / 60} часа до
                 визита.
               </p>
             </div>
-            <div className="how-step reveal">
-              <h3>Или отмените запись.</h3>
+            <div className="how-row reveal">
+              <h3>Или отменяете</h3>
               <p>Время сразу освободится для других.</p>
             </div>
-            <Image
-              className="how-photo reveal"
-              src="/photos/hand.webp"
-              alt="Рука с аккуратным маникюром"
-              width={1024}
-              height={682}
-            />
+          </div>
+        </section>
+        <section className="faq-section" id="faq">
+          <h2 className="reveal">Частые вопросы</h2>
+          <div className="faq-list reveal">
+            <details>
+              <summary>Нужна ли предоплата?</summary>
+              <p>Нет. Оплата в студии после процедуры.</p>
+            </details>
+            <details>
+              <summary>Запись подтверждается сразу?</summary>
+              <p>
+                Да. Если время показано на сайте, оно свободно, и запись подтверждается
+                автоматически.
+              </p>
+            </details>
+            <details>
+              <summary>За какое время можно перенести запись?</summary>
+              <p>
+                Не позже чем за {rules.changeCutoffMin / 60} часа до визита, до{' '}
+                {rules.maxClientMoves} раз. Позже позвоните в студию.
+              </p>
+            </details>
+            <details>
+              <summary>Нужен ли Telegram?</summary>
+              <p>Нет. Запись работает на сайте, а бота можно подключить по желанию.</p>
+            </details>
+            <details>
+              <summary>Где вы находитесь?</summary>
+              <p>Москва, Лунный переулок, 7.</p>
+            </details>
           </div>
         </section>
         <section className="contacts-section" id="contacts">
           <h2 className="reveal">Контакты</h2>
-          <div className="contact-row reveal">Лунка</div>
-          <div className="contact-row reveal">Лунный переулок, 7</div>
-          <div className="contact-row reveal">Москва</div>
-          <div className="contact-row reveal">Пн–Пт 10:00–22:00, Сб 10:00–15:00</div>
-          <div className="contact-row reveal">
+          <div className="contact-line reveal">Лунный переулок, 7</div>
+          <div className="contact-line reveal">Москва</div>
+          <div className="contact-line reveal">Пн-Пт 10:00-22:00, Сб 10:00-15:00</div>
+          <div className="contact-line reveal">
             <a href="tel:+70000000000">+7 000 000-00-00</a>
           </div>
-          <div className="contact-row contact-action reveal">
-            Записаться{' '}
-            <Link className="button" href="/book">
-              Выбрать время
-            </Link>
-          </div>
+          <Pill href="/book" rose>
+            Выбрать время
+          </Pill>
         </section>
       </main>
       <footer className="footer">
         <div className="footer-cols">
           <div>
-            Лунка
-            <br />
             Лунный переулок, 7<br />
             Москва
           </div>
-          <div>
-            <a href="#services">Услуги</a>
+          <nav aria-label="Разделы в подвале">
+            <a href="#price">Прайс</a>
+            <a href="#works">Работы</a>
             <a href="#masters">Мастера</a>
-            <a href="#how">Как изменить запись</a>
             <a href="#contacts">Контакты</a>
-          </div>
+          </nav>
           <div>
-            Пн–Пт 10:00–22:00
+            Пн-Пт 10:00-22:00
             <br />
-            Сб 10:00–15:00
-            <br />
-            <a href="tel:+70000000000">+7 000 000-00-00</a>
+            Сб 10:00-15:00
           </div>
           <div>
             Демонстрационный проект. Студия, мастера и записи вымышленные, настоящие услуги не
             оказываются.
           </div>
         </div>
-        <div className="footer-bottom">
-          <div className="photo-credits">
-            Источники фото:{' '}
-            {photoCredits.map((credit, i) => (
-              <span key={credit.url}>
-                <a href={credit.url} target="_blank" rel="noreferrer">
-                  {credit.label}
-                </a>
-                {i < photoCredits.length - 1 ? '; ' : ''}
-              </span>
-            ))}
-          </div>
-          <div className="footer-word">лунка</div>
-        </div>
+        <p>Фото: Pexels, снимки из фотостока, не работы студии. Ноготь нарисован в коде.</p>
+        <p className="photo-credits">
+          {photoCredits.map((credit, i) => (
+            <span key={credit.url}>
+              <a href={credit.url} target="_blank" rel="noreferrer">
+                {credit.label}
+              </a>
+              {i < photoCredits.length - 1 ? ' · ' : ''}
+            </span>
+          ))}
+        </p>
+        <div className="footer-word">ЛУНКА</div>
       </footer>
     </>
   );

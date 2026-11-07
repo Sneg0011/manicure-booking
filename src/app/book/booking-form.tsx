@@ -5,7 +5,14 @@ import { SlotPicker, type SiteSlot } from './slot-picker';
 import { submitBookingAction } from '../actions/booking';
 import { durationText, slotText } from '../../site/format';
 
-type Service = { id: number; name: string; durationMin: number; priceRub: number };
+type Service = {
+  id: number;
+  name: string;
+  description: string | null;
+  category: string;
+  durationMin: number;
+  priceRub: number;
+};
 type Master = { id: number; name: string };
 function errorText(error: string): string {
   if (error === 'slot_taken') return 'Это время только что заняли';
@@ -19,17 +26,19 @@ export function BookingForm({
   services,
   masters,
   initialServiceId,
+  initialMasterId,
   dates,
   demoVersion,
 }: {
   services: Service[];
   masters: Master[];
   initialServiceId: number | null;
+  initialMasterId: number | null;
   dates: string[];
   demoVersion: string;
 }) {
   const [serviceId, setServiceId] = useState<number | null>(initialServiceId);
-  const [masterId, setMasterId] = useState<number | null>(null);
+  const [masterId, setMasterId] = useState<number | null>(initialMasterId);
   const [slot, setSlot] = useState<SiteSlot | null>(null);
   const [step, setStep] = useState(initialServiceId ? 'time' : 'service');
   const [name, setName] = useState('');
@@ -153,6 +162,9 @@ export function BookingForm({
                     }}
                   >
                     {item.name}
+                    <small>
+                      {item.category} · {item.description}
+                    </small>
                     <span>
                       {durationText(item.durationMin)} · {item.priceRub.toLocaleString('ru-RU')} ₽
                     </span>

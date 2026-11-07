@@ -19,10 +19,32 @@ export async function getCatalog(deps: Deps) {
   return {
     services: allServices.map((service) => ({
       ...service,
-      variedPrice: prices.some(
-        (p) => p.serviceId === service.id && p.priceRub !== null && p.priceRub !== service.priceRub,
-      ),
+      byMaster: Object.fromEntries(
+        allMasters.map((master) => {
+          const link = prices.find(
+            (price) => price.serviceId === service.id && price.masterId === master.id,
+          );
+          return [
+            master.id,
+            link
+              ? {
+                  priceRub: link.priceRub ?? service.priceRub,
+                  durationMin: link.durationMin ?? service.durationMin,
+                }
+              : null,
+          ];
+        }),
+      ) as Record<number, { priceRub: number; durationMin: number } | null>,
     })),
     masters: allMasters,
+    get categories() {
+      const order = ['Маникюр', 'Педикюр', 'Ремонт'];
+      return [...new Set([...order, ...this.services.map((service) => service.category)])]
+        .map((name) => ({
+          name,
+          services: this.services.filter((service) => service.category === name),
+        }))
+        .filter((group) => group.services.length > 0);
+    },
   };
 }

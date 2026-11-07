@@ -280,15 +280,13 @@ export async function moveBooking(
             updatedAt: new Date(),
           })
           .where(eq(bookings.id, current.id));
-        await tx
-          .insert(bookingEvents)
-          .values({
-            bookingId: current.id,
-            actor: input.actor,
-            type: 'moved',
-            before: { startsAt: current.startsAt.toISOString(), masterId: current.masterId },
-            after: { startsAt: input.newStart.toISOString(), masterId },
-          });
+        await tx.insert(bookingEvents).values({
+          bookingId: current.id,
+          actor: input.actor,
+          type: 'moved',
+          before: { startsAt: current.startsAt.toISOString(), masterId: current.masterId },
+          after: { startsAt: input.newStart.toISOString(), masterId },
+        });
         await planNotifications(tx as unknown as Db, {
           bookingId: current.id,
           actor: input.actor,
@@ -336,15 +334,13 @@ export async function cancelBooking(
       .update(bookings)
       .set({ status: 'cancelled', updatedAt: new Date() })
       .where(eq(bookings.id, current.id));
-    await tx
-      .insert(bookingEvents)
-      .values({
-        bookingId: current.id,
-        actor: input.actor,
-        type: 'cancelled',
-        before: { status: current.status },
-        after: { status: 'cancelled', reason: input.reason ?? null },
-      });
+    await tx.insert(bookingEvents).values({
+      bookingId: current.id,
+      actor: input.actor,
+      type: 'cancelled',
+      before: { status: current.status },
+      after: { status: 'cancelled', reason: input.reason ?? null },
+    });
     await planNotifications(tx as unknown as Db, {
       bookingId: current.id,
       actor: input.actor,
@@ -375,15 +371,13 @@ export async function setVisitResult(
       .update(bookings)
       .set({ status: input.result, updatedAt: new Date() })
       .where(eq(bookings.id, current.id));
-    await tx
-      .insert(bookingEvents)
-      .values({
-        bookingId: current.id,
-        actor: 'manager',
-        type: 'visit_result',
-        before: { status: current.status },
-        after: { status: input.result },
-      });
+    await tx.insert(bookingEvents).values({
+      bookingId: current.id,
+      actor: 'manager',
+      type: 'visit_result',
+      before: { status: current.status },
+      after: { status: input.result },
+    });
     return { ok: true, value: current.id };
   });
   if (!result.ok) return result;

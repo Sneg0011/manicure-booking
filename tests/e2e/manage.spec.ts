@@ -15,7 +15,7 @@ async function sql(text: string, values: unknown[] = []) {
 
 async function book(page: import('@playwright/test').Page) {
   await page.goto('/book?service=2');
-  await page.locator('.days button:not([disabled])').first().click();
+  await page.locator('.days button:not([disabled])').nth(1).click();
   await page.locator('.slot').first().click();
   await page.getByRole('button', { name: 'Дальше' }).click();
   await page.getByRole('button', { name: 'Подставить тестовые данные' }).click();
@@ -35,7 +35,7 @@ test('личная страница не индексируется, перен�
   browser,
 }) => {
   await page.goto('/book?service=2');
-  await page.locator('.days button:not([disabled])').first().click();
+  await page.locator('.days button:not([disabled])').nth(1).click();
   const first = page.locator('.slot').first();
   const oldTime = await first.getAttribute('aria-label');
   await first.click();
@@ -52,7 +52,7 @@ test('личная страница не индексируется, перен�
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
   await page.getByRole('button', { name: 'Перенести' }).click();
-  await page.locator('.move-panel .days button:not([disabled])').first().click();
+  await page.locator('.move-panel .days button:not([disabled])').nth(1).click();
   const newTime = await page.locator('.move-panel .slot').last().getAttribute('aria-label');
   await page.locator('.move-panel .slot').last().click();
   await page.getByRole('button', { name: 'Подтвердить перенос' }).click();
@@ -60,15 +60,25 @@ test('личная страница не индексируется, перен�
   const other = await browser.newPage();
   await other.goto('/book?service=2');
   await other.getByRole('button', { name: masterName }).click();
-  await other.locator('.days button:not([disabled])').first().click();
+  // Подпись времени заканчивается датой: день выбираем по ней, потому что у конкретного
+  // мастера свободные дни могут идти иначе, чем у «любого».
+  const dayOf = (label: string | null) => (label ?? '').split(', ').slice(1).join(', ');
+  const openDay = (label: string | null) =>
+    other
+      .locator('.days')
+      .getByRole('button', { name: dayOf(label) })
+      .click();
+  await openDay(oldTime);
   await expect(other.locator(`.slot[aria-label="${oldTime}"]`)).toBeVisible();
+  await openDay(newTime);
+  await expect(other.locator(`.slot`).first()).toBeVisible();
   await expect(other.locator(`.slot[aria-label="${newTime}"]`)).toHaveCount(0);
   page.on('dialog', (dialog) => dialog.accept());
   await page.getByRole('button', { name: 'Отменить запись' }).click();
   await expect(page.getByText('Отменена')).toBeVisible();
   await other.reload();
   await other.getByRole('button', { name: masterName }).click();
-  await other.locator('.days button:not([disabled])').first().click();
+  await openDay(newTime);
   await expect(other.locator(`.slot[aria-label="${newTime}"]`)).toBeVisible();
   await other.close();
   await page.goto(`${url.split('?')[0]}changed`);

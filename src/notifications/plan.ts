@@ -53,24 +53,22 @@ export async function planNotifications(tx: Db, event: NotificationEvent): Promi
       [event.previousMasterId, booking.masterId].filter((id): id is number => id !== undefined),
     ),
   ];
-  await tx
-    .insert(notifications)
-    .values([
-      {
-        bookingId: booking.id,
-        recipient: 'client',
-        channel: clientChannel,
-        status: clientStatus,
-        body: clientBody,
-      },
-      ...masterIds.map((masterId) => ({
-        bookingId: booking.id,
-        recipient: 'master' as const,
-        masterId,
-        channel: 'telegram' as const,
-        status: 'pending' as const,
-        body,
-      })),
-      { bookingId: booking.id, recipient: 'manager', channel: 'journal', status: 'sent', body },
-    ]);
+  await tx.insert(notifications).values([
+    {
+      bookingId: booking.id,
+      recipient: 'client',
+      channel: clientChannel,
+      status: clientStatus,
+      body: clientBody,
+    },
+    ...masterIds.map((masterId) => ({
+      bookingId: booking.id,
+      recipient: 'master' as const,
+      masterId,
+      channel: 'telegram' as const,
+      status: 'pending' as const,
+      body,
+    })),
+    { bookingId: booking.id, recipient: 'manager', channel: 'journal', status: 'sent', body },
+  ]);
 }

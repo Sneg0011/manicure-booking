@@ -27,11 +27,11 @@ test.each([
   await resetDemo(d);
   const masters = (await pool.query('select id,name,bio,photo from masters order by id')).rows;
   expect(masters.map((r) => r.name)).toEqual(['Дарья Соколова', 'Милана Орлова']);
-  expect(masters.every((r) => r.bio && r.photo === null)).toBe(true);
+  expect(masters.every((r) => r.bio && r.photo?.startsWith('/photos/'))).toBe(true);
   const services = (await pool.query('select * from services order by id')).rows;
   expect(services.map((r) => [r.name, r.duration_min, r.buffer_min, r.price_rub])).toEqual([
-    ['Маникюр без покрытия', 45, 15, 1400],
-    ['Маникюр с покрытием', 105, 15, 2600],
+    ['Без покрытия', 45, 15, 1400],
+    ['С покрытием', 105, 15, 2600],
     ['Снятие и новое покрытие', 135, 15, 3000],
     ['Наращивание', 165, 15, 4200],
     ['Ремонт одного ногтя', 15, 15, 400],
