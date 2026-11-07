@@ -47,10 +47,17 @@ test('отменённая запись не занимает время', async
   await expect(insert(2, '10:00', '11:00')).resolves.toBeDefined();
 });
 
-test('20 параллельных вставок: 1 успешна, 19 с кодом 23P01', async () => {
+// Postgres сначала вставляет строку в индекс, потом проверяет конфликт, поэтому две
+// одновременные вставки могут ждать друг друга. Одну из них база прерывает с кодом 40P01.
+// Это такой же отказ, как 23P01: вторая запись не появляется.
+test('20 параллельных вставок: 1 успешна, 19 отклонены запретом или взаимной блокировкой', async () => {
   const results = await Promise.allSettled(Array.from({ length: 20 }, () => insert(2, '18:00', '19:00')));
   expect(results.filter((result) => result.status === 'fulfilled')).toHaveLength(1);
   const rejected = results.filter((result): result is PromiseRejectedResult => result.status === 'rejected');
   expect(rejected).toHaveLength(19);
-  expect(rejected.every((result) => result.reason?.code === '23P01')).toBe(true);
+  expect(rejected.every((result) => ['23P01', '40P01'].includes(result.reason?.code))).toBe(true);
+  const { rows } = await pool.query(
+    `SELECT count(*)::int AS n FROM bookings WHERE master_id = 2 AND status = 'active' AND starts_at = '2026-12-01T18:00:00+03:00'`,
+  );
+  expect(rows[0].n).toBe(1);
 });

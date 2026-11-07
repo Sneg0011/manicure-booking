@@ -1,5 +1,5 @@
 import type { Db } from '../../src/db/client';
-import { masterServices, masters, services, settings, workingHours } from '../../src/db/schema';
+import { masterServices, masters, services, workingHours } from '../../src/db/schema';
 import { fromStudioTime } from '../../src/lib/time';
 import type { Deps } from '../../src/booking/types';
 
@@ -13,7 +13,6 @@ export function deps(db: Db, now: Clock): Deps {
 }
 
 export async function seedFixtures(db: Db): Promise<void> {
-  await db.insert(settings).values({ id: 1 });
   await db.insert(masters).values([
     { id: 1, name: 'Анна' },
     { id: 2, name: 'Мария' },

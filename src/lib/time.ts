@@ -2,11 +2,15 @@ import { TZDate } from '@date-fns/tz';
 
 export const STUDIO_TZ = 'Europe/Moscow';
 
-/** Convert a studio calendar date and wall-clock time to an instant. */
+/**
+ * Convert a studio calendar date and wall-clock time to an instant.
+ * Returns a plain Date: TZDate.toISOString() prints the offset instead of Z,
+ * which would mix two formats in stored history.
+ */
 export function fromStudioTime(date: string, time: string): Date {
   const [year, month, day] = date.split('-').map(Number);
   const [hour, minute] = time.split(':').map(Number);
-  return new TZDate(year, month - 1, day, hour, minute, STUDIO_TZ);
+  return new Date(new TZDate(year, month - 1, day, hour, minute, STUDIO_TZ).getTime());
 }
 
 export function formatStudioTime(date: Date): string {
