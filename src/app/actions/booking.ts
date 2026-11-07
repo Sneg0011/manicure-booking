@@ -1,7 +1,6 @@
 'use server';
 import { after } from 'next/server';
 import { headers } from 'next/headers';
-import { redirect } from 'next/navigation';
 import { getAvailability } from '../../booking/availability';
 import { getDeps } from '../../lib/deps';
 import { submitBooking } from '../../site/booking-actions';
@@ -67,5 +66,6 @@ export async function submitBookingAction(input: {
           : undefined,
     };
   after(() => deliverPending(deps, getSenderFromEnv()));
-  redirect(`/b/${result.value.manageToken}?new=1`);
+  // Не redirect(): Next передаёт его клиенту как исключение, и форма показала бы ошибку на время перехода.
+  return { ok: true as const, manageToken: result.value.manageToken };
 }

@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { SlotPicker, type SiteSlot } from './slot-picker';
 import { submitBookingAction } from '../actions/booking';
 import { durationText, slotText } from '../../site/format';
@@ -37,6 +38,7 @@ export function BookingForm({
   dates: string[];
   demoVersion: string;
 }) {
+  const router = useRouter();
   const [serviceId, setServiceId] = useState<number | null>(initialServiceId);
   const [masterId, setMasterId] = useState<number | null>(initialMasterId);
   const [slot, setSlot] = useState<SiteSlot | null>(null);
@@ -75,18 +77,20 @@ export function BookingForm({
         idempotencyKey: key,
         demoVersion,
       });
-      if (!result.ok) {
-        if (result.error === 'invalid_name') setFieldErrors({ name: 'Имя: от 2 до 60 символов.' });
-        if (result.error === 'invalid_phone')
-          setFieldErrors({ phone: 'Введите номер в формате +7 000 000-00-00.' });
-        setError(errorText(result.error));
-        setAlternatives(result.alternatives ?? []);
+      if (result.ok) {
+        // Кнопка остаётся заблокированной до конца перехода на страницу подтверждения.
+        router.push(`/b/${result.manageToken}?new=1`);
+        return;
       }
+      if (result.error === 'invalid_name') setFieldErrors({ name: 'Имя: от 2 до 60 символов.' });
+      if (result.error === 'invalid_phone')
+        setFieldErrors({ phone: 'Введите номер в формате +7 000 000-00-00.' });
+      setError(errorText(result.error));
+      setAlternatives(result.alternatives ?? []);
     } catch {
       setError('Не удалось отправить форму. Попробуйте ещё раз.');
-    } finally {
-      setBusy(false);
     }
+    setBusy(false);
   }
   return (
     <>

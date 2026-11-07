@@ -96,3 +96,22 @@ test('занятое время исчезает из списка для сле
   await expect(other.locator(`.slot[aria-label="${label}"]`)).toHaveCount(0);
   await other.close();
 });
+
+test('успешная запись не показывает ошибку даже на мгновение', async ({ page }) => {
+  await chooseSlot(page);
+  await page.getByRole('button', { name: 'Подставить тестовые данные' }).click();
+  // Перенаправление после записи не должно считаться сбоем формы.
+  await page.evaluate(() => {
+    const state = window as unknown as { sawBookingError?: boolean };
+    state.sawBookingError = false;
+    new MutationObserver(() => {
+      if (document.querySelector('.booking-error')) state.sawBookingError = true;
+    }).observe(document.body, { childList: true, subtree: true });
+  });
+  await page.getByRole('button', { name: 'Записаться' }).click();
+  await expect(page).toHaveURL(/\/b\/[^/]+\?new=1/);
+  await expect(page.getByRole('heading', { name: 'Вы записаны' })).toBeVisible();
+  expect(
+    await page.evaluate(() => (window as unknown as { sawBookingError?: boolean }).sawBookingError),
+  ).toBe(false);
+});
